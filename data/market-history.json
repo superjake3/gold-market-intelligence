@@ -1,4 +1,14 @@
 {
   "source": "KRX Open API + XAUS + fxapi.app",
-  "records": []
+  "records": [
+    {
+      "base_date": "20261109",
+      "krx_krw_g": 178770.0,
+      "gold_usd_oz": 4121.899902,
+      "usdkrw": 1342.250897,
+      "spot_krw_g": 177877.99,
+      "fetched_at": "2026-11-10T14:28:58+09:00"
+    }
+  ],
+  "updated_at": "2026-11-10T14:28:58+09:00"
 }

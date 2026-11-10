@@ -1,7 +1,8 @@
 {
   "source": "KRX Open API",
-  "base_date": null,
-  "price_krw_g": null,
-  "fetched_at": null,
-  "notice": "Add GitHub repository secret KRX_AUTH_KEY and run the Update KRX Gold Market Price workflow."
+  "base_date": "20261109",
+  "price_krw_g": 178770.0,
+  "change_krw": "2080",
+  "change_rate": "1.18",
+  "fetched_at": "2026-11-10T14:28:58+09:00"
 }
