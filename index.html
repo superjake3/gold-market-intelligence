@@ -7,8 +7,8 @@
 <title>GOLD & FX — Market Dashboard</title>
 </head>
 <body><main class="app-shell">
-<header class="topbar"><div><div class="eyebrow">PERSONAL MARKET MONITOR</div><h1>GOLD <span>&</span> FX</h1></div><button id="refreshBtn" class="primary-btn" type="button">최신 시세 가져오기 ↗</button></header>
-<section class="status-row"><span id="connectionStatus" class="status-dot">● 연결 중</span><span id="lastUpdated">시세를 불러오는 중</span></section><p class="panel-note" id="manualRefreshNote">최신 시세 가져오기를 누르면 GitHub Actions로 이동합니다. 로그인 후 Run workflow를 누르면 새 시세 수집이 시작됩니다.</p>
+<header class="topbar"><div><div class="eyebrow">PERSONAL MARKET MONITOR</div><h1>GOLD <span>&</span> FX</h1></div><button id="refreshBtn" class="primary-btn" type="button">시세 다시 불러오기 ↻</button></header>
+<section class="status-row"><span id="connectionStatus" class="status-dot">● 연결 중</span><span id="lastUpdated">시세를 불러오는 중</span></section><p class="panel-note" id="manualRefreshNote">시세는 GitHub Actions에서 약 5분마다 자동 수집되며, 이 화면은 30초마다 최신 데이터를 확인합니다. 버튼을 누르면 저장된 최신 시세를 바로 다시 불러옵니다.</p>
 <section id="compactView" class="price-grid">
 <article class="price-card gold-card"><div class="card-head"><span>INTERNATIONAL GOLD</span><span class="symbol">GCcv1</span></div><div id="goldUsd" class="price-main">—</div><div class="unit">USD / TROY OZ · COMEX 선물</div><div class="subline">1g <strong id="goldUsdGram">—</strong></div><div class="subline">갱신 시각 <strong id="goldTime">—</strong></div></article>
 <article class="price-card converted-card"><div class="card-head"><span>GOLD · KRW CONVERTED</span><span class="symbol">KRW / g</span></div><div id="convertedGoldTop" class="price-main">—</div><div class="unit">국제 금 원화 환산 기준가</div><div class="subline">국제 금 ÷ 31.1034768 × USD/KRW</div><div class="subline">계산 기준 <strong id="convertedGoldTime">—</strong></div></article>
