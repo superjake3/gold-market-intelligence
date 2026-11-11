@@ -156,13 +156,13 @@ function correlationLabel(value){
 function renderMacroGoldComparison(indicators){
   const real=indicators?.us_10y_real_yield?.observations||[];
   const dollar=indicators?.usd_broad_index?.observations||[];
-  const toMap=rows=>new Map(rows.map(o=>[String(o.date||"").replace(/-/g,"").slice(0,8),Number(o.value)]).filter(([d,v])=>/^\\d{8}$/.test(d)&&Number.isFinite(v)));
+  const toMap=rows=>new Map(rows.map(o=>[String(o.date||"").replace(/-/g,"").slice(0,8),Number(o.value)]).filter(([d,v])=>/^\d{8}$/.test(d)&&Number.isFinite(v)));
   const realMap=toMap(real),dollarMap=toMap(dollar);
   const paired=historyRows.map(row=>{
     const date=String(row.base_date||"").replace(/-/g,"").slice(0,8);
     const gold=Number(row.gold_usd_oz),r=realMap.get(date),d=dollarMap.get(date);
     return {date,gold,real:r,dollar:d};
-  }).filter(p=>/^\\d{8}$/.test(p.date)&&Number.isFinite(p.gold)&&Number.isFinite(p.real)&&Number.isFinite(p.dollar)).sort((a,b)=>a.date.localeCompare(b.date));
+  }).filter(p=>/^\d{8}$/.test(p.date)&&Number.isFinite(p.gold)&&Number.isFinite(p.real)&&Number.isFinite(p.dollar)).sort((a,b)=>a.date.localeCompare(b.date));
   const fmtDate=s=>s?s.slice(0,4)+"."+s.slice(4,6)+"."+s.slice(6,8):"";
   const fmtReturn=v=>v===null?"자료 부족":pct(v);
   const fmtBp=v=>v===null?"자료 부족":(v>0?"+":"")+v.toFixed(1)+"bp";
