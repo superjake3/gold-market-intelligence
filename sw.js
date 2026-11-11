@@ -1,4 +1,4 @@
-const CACHE="gold-fx-static-v7";
+const CACHE="gold-fx-static-v8";
 const ASSETS=["./","./index.html","./styles.css","./app.js","./insights.js","./manifest.webmanifest","./assets/icon.svg"];
 
 self.addEventListener("install",event=>{
@@ -23,7 +23,7 @@ self.addEventListener("fetch",event=>{
   if(url.origin!==location.origin || request.method!=="GET") return;
 
   // Live quote JSON must always come directly from the network.
-  if(url.pathname.endsWith("/data/live-market.json")){
+  if(url.pathname.endsWith("/data/live-market.json") || url.pathname.endsWith("/data/economic-indicators.json")){
     event.respondWith(fetch(request,{cache:"no-store"}));
     return;
   }
