@@ -2,7 +2,7 @@ name: Update Live Market Quotes
 on:
   schedule:
     # Run every 5 minutes, offset from the top of the hour to reduce queue contention.
-    - cron: "3-59/5 * * * *"
+    - cron: "4-59/5 * * * *"
   push:
     paths:
       - ".github/workflows/update-live-market.yml"
@@ -124,4 +124,3 @@ jobs:
             sleep 2
           done
           exit 1
-
