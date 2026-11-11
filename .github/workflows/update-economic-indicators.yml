@@ -1,5 +1,8 @@
 name: Update Economic Indicators
 on:
+  schedule:
+    # 매일 오전 9시(KST) — 미국·한국 경제지표의 전일 발표분 반영
+    - cron: "0 0 * * *"
   workflow_dispatch:
 permissions:
   contents: write
