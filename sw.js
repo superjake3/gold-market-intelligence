@@ -1,4 +1,4 @@
-const CACHE="gold-fx-static-v8";
+const CACHE="gold-fx-static-v9";
 const ASSETS=["./","./index.html","./styles.css","./app.js","./insights.js","./manifest.webmanifest","./assets/icon.svg"];
 
 self.addEventListener("install",event=>{
