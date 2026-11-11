@@ -36,3 +36,15 @@ Android Chrome에서 배포 주소를 열고 메뉴 → 홈 화면에 추가를 
 - 네이버 국내 금: https://m.stock.naver.com/marketindex/metals/M04020000
 - 네이버 환율: https://stock.naver.com/marketindex/exchange/FX_USDKRW
 - KRX Open API: https://openapi.krx.co.kr/
+
+## 경제 지표 데이터 (신규)
+- FRED: 미국 10년물 국채금리(DGS10), 10년물 실질금리(DFII10), 달러 종합지수(DTWEXBGS), 미국 CPI(CPIAUCSL)
+- 한국은행 ECOS: 한국 기준금리(722Y001 / 0101000), 한국 CPI(901Y009 / 0)
+- 수집 스크립트: `scripts/update-economic-data.py`
+- 결과 파일: `data/economic-indicators.json`
+- 최초 연결 전 GitHub 저장소 Settings → Secrets and variables → Actions에 `FRED_API_KEY`, `ECOS_API_KEY`를 등록합니다.
+- API 키는 대시보드 코드나 공개 JSON에 넣지 않고 GitHub Actions에서만 사용합니다.
+- 최초 연결은 Actions → Update Economic Indicators → Run workflow로 수동 실행합니다. 데이터와 응답 형식을 확인한 뒤 정기 실행을 활성화합니다.
+- FRED API: https://fred.stlouisfed.org/docs/api/fred/
+- ECOS Open API: https://ecos.bok.or.kr/api/
+- World Gold Council 금 수요·공급 자료는 정기 보고서 기반의 학습 자료로 연결하며, 자동 API 데이터처럼 취급하지 않습니다.
