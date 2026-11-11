@@ -75,8 +75,8 @@ const economicFmt = (value, unit) => {
 function economicDate(value){
   if(!value)return "기준일 미상";
   const s=String(value);
-  if(/^\\d{6}$/.test(s))return s.slice(0,4)+"년 "+Number(s.slice(4,6))+"월";
-  if(/^\\d{4}-\\d{2}-\\d{2}$/.test(s))return s.replace(/-/g,".");
+  if(/^\d{6}$/.test(s))return s.slice(0,4)+"년 "+Number(s.slice(4,6))+"월";
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s.replace(/-/g,".");
   return s;
 }
 function drawEconomicChart(id, observations){
