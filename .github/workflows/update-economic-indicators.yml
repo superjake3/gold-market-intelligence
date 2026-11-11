@@ -1,0 +1,24 @@
+name: Update Economic Indicators
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: economic-indicators
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Collect FRED and ECOS indicators
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
+        run: python scripts/update-economic-data.py
+      - name: Commit economic indicators
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/economic-indicators.json
+          git diff --cached --quiet || (git commit -m "Update economic indicators" && git push)
