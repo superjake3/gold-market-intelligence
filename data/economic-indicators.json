@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "fetched_at": null,
+  "note": "FRED_API_KEY와 ECOS_API_KEY를 GitHub Actions Secrets에 등록한 뒤 Update Economic Indicators workflow를 실행하면 채워집니다.",
+  "indicators": {}
+}
