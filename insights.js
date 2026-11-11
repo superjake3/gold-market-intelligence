@@ -5,6 +5,7 @@ const money = n => Number.isFinite(n) ? nf(n,0)+"원" : "—";
 const changePct = (a,b) => Number.isFinite(a)&&Number.isFinite(b)&&b!==0 ? (a/b-1)*100 : null;
 const el = id => document.getElementById(id);
 let historyRows = [];
+let economicIndicatorsCache = null;
 function periodChange(key, days) {
   if (!historyRows.length) return null;
   const latest = historyRows[historyRows.length-1], target = historyRows[Math.max(0, historyRows.length-1-days)];
@@ -52,7 +53,7 @@ async function loadMarketHistory(){
   renderPeriod("spot7d",periodChange("spot_krw_g",7));renderPeriod("fx7d",periodChange("usdkrw",7));
   if(el("historyCount"))el("historyCount").textContent=historyRows.length+"거래일 축적";
   if(el("historyLatest"))el("historyLatest").textContent=historyRows.length?historyRows[historyRows.length-1].base_date+" 기준":"데이터 대기 중";
-  renderHistoryChart();renderDailyLesson();
+  renderHistoryChart();renderDailyLesson();if(economicIndicatorsCache)renderMacroGoldComparison(economicIndicatorsCache);
 }
 document.addEventListener("DOMContentLoaded",loadMarketHistory);
 
@@ -113,7 +114,7 @@ async function loadEconomicIndicators(){
   try{
     const response=await fetch(ECONOMIC_URL+"?v="+Date.now(),{cache:"no-store"});
     if(!response.ok)throw Error("HTTP "+response.status);
-    const data=await response.json(),indicators=data.indicators||{};
+    const data=await response.json(),indicators=data.indicators||{};economicIndicatorsCache=indicators;
     if(!Object.keys(indicators).length)throw Error("지표 데이터가 비어 있습니다.");
     for(const [id,item] of Object.entries(indicators)){
       const latest=item.latest||item.observations?.at(-1),previous=item.previous;
@@ -130,7 +131,7 @@ async function loadEconomicIndicators(){
       drawEconomicChart(id,item.observations||[]);
     }
     if(stamp)stamp.textContent="수집 "+(data.fetched_at?localTime(data.fetched_at):"시각 미상");
-    renderEconomicReading(indicators);
+    renderEconomicReading(indicators);renderMacroGoldComparison(indicators);
   }catch(error){
     if(stamp)stamp.textContent="데이터 연결 실패";
     const box=el("economicReading");if(box)box.textContent="경제 지표를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.";
@@ -138,3 +139,64 @@ async function loadEconomicIndicators(){
   }
 }
 document.addEventListener("DOMContentLoaded",loadEconomicIndicators);
+
+
+function pearsonCorrelation(xs,ys){
+  if(xs.length!==ys.length||xs.length<4)return null;
+  const mx=xs.reduce((a,b)=>a+b,0)/xs.length,my=ys.reduce((a,b)=>a+b,0)/ys.length;
+  let numerator=0,dx=0,dy=0;
+  for(let i=0;i<xs.length;i++){const x=xs[i]-mx,y=ys[i]-my;numerator+=x*y;dx+=x*x;dy+=y*y;}
+  return dx&&dy?numerator/Math.sqrt(dx*dy):null;
+}
+function correlationLabel(value){
+  if(value===null)return "표본 부족";
+  const strength=Math.abs(value)>=0.7?"강한":Math.abs(value)>=0.4?"중간 정도의":"약한";
+  return strength+(value>0?" 양(+)의 동행":" 음(-)의 동행")+" · "+value.toFixed(2);
+}
+function renderMacroGoldComparison(indicators){
+  const real=indicators?.us_10y_real_yield?.observations||[];
+  const dollar=indicators?.usd_broad_index?.observations||[];
+  const toMap=rows=>new Map(rows.map(o=>[String(o.date||"").replace(/-/g,"").slice(0,8),Number(o.value)]).filter(([d,v])=>/^\\d{8}$/.test(d)&&Number.isFinite(v)));
+  const realMap=toMap(real),dollarMap=toMap(dollar);
+  const paired=historyRows.map(row=>{
+    const date=String(row.base_date||"").replace(/-/g,"").slice(0,8);
+    const gold=Number(row.gold_usd_oz),r=realMap.get(date),d=dollarMap.get(date);
+    return {date,gold,real:r,dollar:d};
+  }).filter(p=>/^\\d{8}$/.test(p.date)&&Number.isFinite(p.gold)&&Number.isFinite(p.real)&&Number.isFinite(p.dollar)).sort((a,b)=>a.date.localeCompare(b.date));
+  const fmtDate=s=>s?s.slice(0,4)+"."+s.slice(4,6)+"."+s.slice(6,8):"";
+  const fmtReturn=v=>v===null?"자료 부족":pct(v);
+  const fmtBp=v=>v===null?"자료 부족":(v>0?"+":"")+v.toFixed(1)+"bp";
+  const renderPeriod=(id,days)=>{
+    const node=el(id);if(!node)return;
+    if(paired.length<2){node.innerHTML="<p>국제 금·실질금리·달러 지수의 관측일이 일치하는 데이터가 2개 이상 필요합니다.</p><p class='macro-muted'>현재 일치 관측일: "+paired.length+"일</p>";return;}
+    const latestDate=paired[paired.length-1].date;
+    const cutoff=new Date(Date.UTC(Number(latestDate.slice(0,4)),Number(latestDate.slice(4,6))-1,Number(latestDate.slice(6,8))-days));
+    const cutoffKey=cutoff.toISOString().slice(0,10).replace(/-/g,"");
+    const rows=paired.filter(p=>p.date>=cutoffKey);
+    if(rows.length<2){node.innerHTML="<p>최근 "+days+"일 구간의 일치 관측치가 아직 부족합니다.</p><p class='macro-muted'>현재 일치 관측일: "+rows.length+"일</p>";return;}
+    const first=rows[0],last=rows[rows.length-1];
+    const goldChange=changePct(last.gold,first.gold);
+    const realBp=(last.real-first.real)*100;
+    const dollarChange=changePct(last.dollar,first.dollar);
+    const goldReturns=[],realMoves=[],dollarReturns=[];
+    for(let i=1;i<rows.length;i++){
+      goldReturns.push(changePct(rows[i].gold,rows[i-1].gold));
+      realMoves.push(rows[i].real-rows[i-1].real);
+      dollarReturns.push(changePct(rows[i].dollar,rows[i-1].dollar));
+    }
+    const corrReal=pearsonCorrelation(goldReturns,realMoves);
+    const corrDollar=pearsonCorrelation(goldReturns,dollarReturns);
+    node.innerHTML=
+      "<div class='macro-date-range'>"+fmtDate(first.date)+" — "+fmtDate(last.date)+" · 일치 관측 "+rows.length+"일</div>"+
+      "<div class='macro-metrics'>"+
+      "<div><span>국제 금</span><strong>"+fmtReturn(goldChange)+"</strong></div>"+
+      "<div><span>미국 실질금리</span><strong>"+fmtBp(realBp)+"</strong></div>"+
+      "<div><span>달러 종합지수</span><strong>"+fmtReturn(dollarChange)+"</strong></div>"+
+      "</div>"+
+      "<div class='macro-correlation'><span>금 ↔ 실질금리</span><strong>"+correlationLabel(corrReal)+"</strong></div>"+
+      "<div class='macro-correlation'><span>금 ↔ 달러 지수</span><strong>"+correlationLabel(corrDollar)+"</strong></div>"+
+      "<div class='macro-muted'>상관계수 계산에 사용한 일간 변화 쌍: "+Math.max(0,rows.length-1)+"개 · 표본이 적으면 값의 변동성이 큽니다.</div>";
+  };
+  renderPeriod("macroCompare7",7);
+  renderPeriod("macroCompare30",30);
+}
