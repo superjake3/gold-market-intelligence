@@ -1,0 +1,22 @@
+name: Schedule Trigger Diagnostic
+
+on:
+  schedule:
+    # Independent five-minute schedule, offset from the live quote workflow.
+    - cron: "2-59/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-schedule:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Record schedule trigger
+        run: |
+          echo "Schedule diagnostic started."
+          echo "UTC time: $(date -u --iso-8601=seconds)"
+          echo "Event: ${GITHUB_EVENT_NAME}"
+          echo "Ref: ${GITHUB_REF}"
