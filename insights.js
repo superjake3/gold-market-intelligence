@@ -55,3 +55,86 @@ async function loadMarketHistory(){
   renderHistoryChart();renderDailyLesson();
 }
 document.addEventListener("DOMContentLoaded",loadMarketHistory);
+
+
+// Macroeconomic indicators
+const ECONOMIC_URL = "./data/economic-indicators.json";
+const economicLabels = {
+  us_10y_yield:"미국 10년물 국채금리",
+  us_10y_real_yield:"미국 10년물 실질금리",
+  usd_broad_index:"미국 달러 종합지수",
+  us_cpi:"미국 소비자물가지수",
+  kr_base_rate:"한국은행 기준금리",
+  kr_cpi:"한국 소비자물가지수"
+};
+const economicFmt = (value, unit) => {
+  const n=Number(value);
+  if(!Number.isFinite(n)) return "—";
+  return new Intl.NumberFormat("ko-KR",{maximumFractionDigits:unit==="%"?2:unit==="지수"?2:4,minimumFractionDigits:unit==="%"?2:0}).format(n)+(unit==="%"?"%":"");
+};
+function economicDate(value){
+  if(!value)return "기준일 미상";
+  const s=String(value);
+  if(/^\\d{6}$/.test(s))return s.slice(0,4)+"년 "+Number(s.slice(4,6))+"월";
+  if(/^\\d{4}-\\d{2}-\\d{2}$/.test(s))return s.replace(/-/g,".");
+  return s;
+}
+function drawEconomicChart(id, observations){
+  const svg=el("econ-chart-"+id);if(!svg)return;
+  const rows=(Array.isArray(observations)?observations:[]).filter(o=>Number.isFinite(Number(o.value))).slice(-90);
+  if(rows.length<2){svg.innerHTML='<text x="320" y="78" fill="#9aa99e" text-anchor="middle" font-size="13">추세 데이터가 부족합니다.</text>';return;}
+  const vals=rows.map(o=>Number(o.value)),min=Math.min(...vals),max=Math.max(...vals),span=max-min||Math.max(Math.abs(max)*.02,1);
+  const x=i=>18+i/(rows.length-1)*604,y=v=>119-(v-min)/span*94;
+  const path=vals.map((v,i)=>(i?"L":"M")+x(i).toFixed(1)+","+y(v).toFixed(1)).join(" ");
+  const area=path+" L "+x(vals.length-1)+",126 L 18,126 Z";
+  const first=economicDate(rows[0].date),last=economicDate(rows[rows.length-1].date);
+  svg.innerHTML='<line x1="18" y1="25" x2="622" y2="25" stroke="#2b3a30"/><line x1="18" y1="72" x2="622" y2="72" stroke="#2b3a30"/><line x1="18" y1="126" x2="622" y2="126" stroke="#2b3a30"/><path d="'+area+'" fill="#d9b66c" fill-opacity=".10"/><path d="'+path+'" fill="none" stroke="#d9b66c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><text x="18" y="14" fill="#9aa99e" font-size="10">'+nf(max,2)+'</text><text x="622" y="14" fill="#9aa99e" font-size="10" text-anchor="end">'+nf(min,2)+'</text><text x="18" y="145" fill="#9aa99e" font-size="10">'+first+'</text><text x="622" y="145" fill="#9aa99e" font-size="10" text-anchor="end">'+last+'</text>';
+}
+function renderEconomicReading(indicators){
+  const box=el("economicReading");if(!box)return;
+  const real=indicators.us_10y_real_yield,nominal=indicators.us_10y_yield,dollar=indicators.usd_broad_index,usCpi=indicators.us_cpi,krRate=indicators.kr_base_rate,krCpi=indicators.kr_cpi;
+  const delta=x=>x?.latest&&x?.previous?Number(x.latest.value)-Number(x.previous.value):null;
+  const lines=[];
+  if(real?.latest&&real?.previous){
+    const d=delta(real);lines.push("미국 실질금리는 직전 관측치보다 "+(d>0?"상승":d<0?"하락":"변화 없음")+"했습니다. 실질금리 상승은 일반적으로 이자를 지급하지 않는 금의 보유 기회비용을 높일 수 있습니다.");
+  }
+  if(dollar?.latest&&dollar?.previous){
+    const d=delta(dollar);lines.push("달러 종합지수는 직전 관측치보다 "+(d>0?"강해졌습니다":d<0?"약해졌습니다":"변화가 없습니다")+". 달러 강세는 다른 통화권 투자자의 금 매입 부담을 높일 수 있습니다.");
+  }
+  if(usCpi?.latest&&usCpi?.previous){
+    const d=delta(usCpi);lines.push("미국 CPI 지수는 직전 발표치 대비 "+(d>0?"상승":d<0?"하락":"보합")+"했습니다. 물가 흐름은 금리 기대와 실질금리를 통해 금 시장에 간접적으로 영향을 줄 수 있습니다.");
+  }
+  if(krRate?.latest&&krCpi?.latest)lines.push("한국 기준금리 "+economicFmt(krRate.latest.value,"%")+", 한국 CPI "+economicFmt(krCpi.latest.value,"지수")+"입니다. 국내 금 가격을 볼 때 원화 환율과 함께 국내 통화정책·물가 흐름도 참고할 수 있습니다.");
+  if(nominal?.latest&&real?.latest)lines.push("명목금리와 실질금리는 서로 다른 지표입니다. 두 수치의 차이를 단순히 기대 인플레이션으로 단정하지 말고 물가연동채권 시장의 특성도 함께 고려해야 합니다.");
+  box.innerHTML=lines.map(t=>"<p>"+t+"</p>").join("")||"경제 지표 데이터가 충분하지 않습니다.";
+}
+async function loadEconomicIndicators(){
+  const stamp=el("economicUpdated");
+  try{
+    const response=await fetch(ECONOMIC_URL+"?v="+Date.now(),{cache:"no-store"});
+    if(!response.ok)throw Error("HTTP "+response.status);
+    const data=await response.json(),indicators=data.indicators||{};
+    if(!Object.keys(indicators).length)throw Error("지표 데이터가 비어 있습니다.");
+    for(const [id,item] of Object.entries(indicators)){
+      const latest=item.latest||item.observations?.at(-1),previous=item.previous;
+      const value=el("econ-"+id),meta=el("econ-meta-"+id);
+      if(value)value.textContent=economicFmt(latest?.value,item.unit);
+      if(meta){
+        let comparison="직전 관측치 없음";
+        if(latest&&previous){
+          const diff=Number(latest.value)-Number(previous.value);
+          comparison="직전 "+economicFmt(previous.value,item.unit)+" · "+(diff>0?"+":"")+economicFmt(diff,item.unit)+" 변화";
+        }
+        meta.textContent=economicDate(latest?.date)+" 기준 · "+comparison;
+      }
+      drawEconomicChart(id,item.observations||[]);
+    }
+    if(stamp)stamp.textContent="수집 "+(data.fetched_at?localTime(data.fetched_at):"시각 미상");
+    renderEconomicReading(indicators);
+  }catch(error){
+    if(stamp)stamp.textContent="데이터 연결 실패";
+    const box=el("economicReading");if(box)box.textContent="경제 지표를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.";
+    console.error("Economic indicators:",error);
+  }
+}
+document.addEventListener("DOMContentLoaded",loadEconomicIndicators);
