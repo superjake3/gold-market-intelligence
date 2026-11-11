@@ -16,7 +16,7 @@ async function triggerLiveCollection(previousFetchedAt){
   if(!endpoint){
     endpoint=prompt("Cloudflare Worker 주소를 입력해 주세요.\n예: https://gold-market-refresh.계정명.workers.dev");
     if(!endpoint)return false;
-    endpoint=endpoint.trim().replace(/\\/$/,"");
+    endpoint=endpoint.trim().replace(/\/$/,"");
     try{const u=new URL(endpoint);if(u.protocol!=="https:")throw Error("HTTPS 주소가 필요합니다.");}catch{throw Error("올바른 HTTPS Worker 주소를 입력해 주세요.");}
     localStorage.setItem("goldRefreshEndpoint",endpoint);
   }
@@ -49,7 +49,7 @@ async function triggerLiveCollection(previousFetchedAt){
   throw Error("수집 요청은 접수됐지만 3분 안에 새 데이터가 확인되지 않았습니다. 잠시 후 다시 확인해 주세요.");
 }
 async function refresh(requestFresh=false){
-  const button=$("refreshBtn"),originalText="시세 다시 불러오기 ↻";
+  const button=$("refreshBtn"),originalText="새 시세 수집 ↻";
   if(button.disabled)return;
   button.disabled=true;
   setStatus(requestFresh?"새 시세 수집 요청 중":"시세 데이터 확인 중");
@@ -58,7 +58,7 @@ async function refresh(requestFresh=false){
     const initial=await Promise.allSettled([loadLiveMarket(),loadKrxGold()]);
     liveOk=initial[0].status==="fulfilled";
     render();savePoint();
-    if(requestFresh&&liveOk){
+    if(requestFresh){
       const previous=market.liveFetchedAt?new Date(market.liveFetchedAt).getTime():0;
       const completed=await triggerLiveCollection(previous);
       if(completed){
