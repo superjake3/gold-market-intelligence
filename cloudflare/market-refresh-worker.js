@@ -9,7 +9,7 @@ export default {
     const cors = {
       "Access-Control-Allow-Origin": allowedOrigin,
       "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Headers": "Content-Type, X-Refresh-Key",
       "Vary": "Origin"
     };
 
@@ -24,6 +24,11 @@ export default {
     if (request.method !== "POST") {
       return new Response(JSON.stringify({ error: "Method not allowed" }), {
         status: 405, headers: { ...cors, "Content-Type": "application/json" }
+      });
+    }
+    if (!env.REFRESH_KEY || request.headers.get("X-Refresh-Key") !== env.REFRESH_KEY) {
+      return new Response(JSON.stringify({ error: "Invalid refresh key" }), {
+        status: 401, headers: { ...cors, "Content-Type": "application/json" }
       });
     }
     if (!env.GITHUB_TOKEN) {
