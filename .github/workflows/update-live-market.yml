@@ -1,5 +1,7 @@
 name: Update Live Market Quotes
 on:
+  schedule:
+    - cron: "0 * * * *"
   workflow_dispatch:
 permissions:
   contents: write
@@ -81,9 +83,22 @@ jobs:
 
           attempt_at = now_kst()
           errors = {}
-          successes = []
+          updated_names = []
+          changed = False
+
+          def parse_time(value):
+              if not value:
+                  return None
+              try:
+                  parsed = datetime.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+                  if parsed.tzinfo is None:
+                      parsed = parsed.replace(tzinfo=ZoneInfo("Asia/Seoul"))
+                  return parsed
+              except (TypeError, ValueError):
+                  return None
 
           for name, url in sources.items():
+              previous = output.get(name) or {}
               try:
                   data = get_json(url)
                   price = number(find_value(data, ["closePrice"]))
@@ -91,36 +106,94 @@ jobs:
                       raise RuntimeError("closePrice missing or invalid")
                   traded_at = find_value(data, ["localTradedAt", "localTradedAtString"])
                   status = find_value(data, ["marketStatus"])
-                  output[name] = {
-                      "closePrice": price,
-                      "localTradedAt": traded_at,
-                      "marketStatus": status,
-                      "fetchedAt": attempt_at
-                  }
-                  successes.append(name)
-                  print(f"OK {name}: {price} @ {traded_at} ({status})")
+                  status_text = str(status).strip().upper() if status is not None else ""
+                  old_traded = parse_time(previous.get("localTradedAt"))
+                  new_traded = parse_time(traded_at)
+                  has_new_trade_time = bool(new_traded and (not old_traded or new_traded > old_traded))
+
+                  # Each provider reports its own market status. Accept a quote while
+                  # that market is open, or when its actual trade timestamp advances
+                  # (for example, the final quote published at market close).
+                  should_update_quote = (
+                      status_text in ("OPEN", "TRADING", "CONTINUOUS")
+                      or has_new_trade_time
+                      or not previous.get("closePrice")
+                  )
+
+                  if should_update_quote:
+                      output[name] = {
+                          "closePrice": price,
+                          "localTradedAt": traded_at,
+                          "marketStatus": status,
+                          "fetchedAt": attempt_at,
+                          "lastCheckedAt": attempt_at
+                      }
+                      updated_names.append(name)
+                      changed = True
+                      print(f"UPDATED {name}: {price} @ {traded_at} ({status})")
+                  else:
+                      # Do not replace a closed market's last valid price with a
+                      # stale quote. Still record a status transition if one occurs.
+                      current = dict(previous)
+                      if status is not None and current.get("marketStatus") != status:
+                          current["marketStatus"] = status
+                          current["statusCheckedAt"] = attempt_at
+                          changed = True
+                      output[name] = current
+                      print(f"UNCHANGED {name}: keeping {current.get('closePrice')} @ {current.get('localTradedAt')} ({status})")
               except Exception as exc:
                   errors[name] = str(exc)
                   print(f"WARNING {name}: {exc}; keeping previous valid value")
 
-          output["last_attempt_at"] = attempt_at
-          output["errors"] = errors
-          if successes:
+          if output.get("errors", {}) != errors:
+              output["errors"] = errors
+              changed = True
+
+          if updated_names:
               output["fetched_at"] = attempt_at
+
+              # Keep an hourly snapshot with independent trade/fetch timestamps
+              # for all three markets. Each quote retains its own market status.
+              history_path = "data/live-market-history.json"
+              try:
+                  with open(history_path, encoding="utf-8") as history_file:
+                      history = json.load(history_file)
+              except (FileNotFoundError, json.JSONDecodeError):
+                  history = {"source": "Naver Finance public market-index data", "records": []}
+
+              record = {"captured_at": attempt_at}
+              for name in sources:
+                  quote = output.get(name) or {}
+                  record[name] = {
+                      "closePrice": quote.get("closePrice"),
+                      "localTradedAt": quote.get("localTradedAt"),
+                      "marketStatus": quote.get("marketStatus"),
+                      "fetchedAt": quote.get("fetchedAt")
+                  }
+
+              records = history.get("records", [])
+              records.append(record)
+              history["records"] = records[-8760:]
+              history["updated_at"] = attempt_at
+              with open(history_path, "w", encoding="utf-8") as history_file:
+                  json.dump(history, history_file, ensure_ascii=False, indent=2)
+              print("Historical snapshot recorded.")
+
+          if changed:
+              output["last_attempt_at"] = attempt_at
               with open("data/live-market.json", "w", encoding="utf-8") as target:
                   json.dump(output, target, ensure_ascii=False, indent=2)
-              print("Updated independently: " + ", ".join(successes))
+              print("Market snapshot updated.")
           else:
-              print("No source returned a valid quote. Existing published data is left untouched.")
-              raise SystemExit("All quote sources failed; no snapshot was overwritten.")
+              print("No market is currently publishing a new quote; previous valid data remains unchanged.")
+
           if errors:
-              print("PARTIAL_UPDATE_ERRORS=" + json.dumps(errors, ensure_ascii=False))
-          PY
+              print("SOURCE_ERRORS=" + json.dumps(errors, ensure_ascii=False))
       - name: Commit live market snapshot
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/live-market.json
+          git add data/live-market.json data/live-market-history.json
           if git diff --cached --quiet; then
             echo "No quote changes to publish."
             exit 0
