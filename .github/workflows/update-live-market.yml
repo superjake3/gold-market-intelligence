@@ -1,7 +1,7 @@
 name: Update Live Market Quotes
 on:
   schedule:
-    # Run every 5 minutes, offset from the top of the hour to reduce queue contention.
+    # Every 5 minutes (UTC); GitHub Actions may start scheduled jobs a little late.
     - cron: "4-59/5 * * * *"
   push:
     paths:
@@ -9,21 +9,20 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
-  pages: write
-  id-token: write
 concurrency:
   group: live-market-quotes
   cancel-in-progress: false
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch Naver market quotes
+      - name: Fetch each market quote independently
+        id: collect
         run: |
           python - <<'PY'
-          import datetime, json, re, urllib.request
+          import datetime, json, os, re, urllib.request
           from zoneinfo import ZoneInfo
 
           HEADERS = {
@@ -32,12 +31,15 @@ jobs:
               "Referer": "https://stock.naver.com/"
           }
 
+          def now_kst():
+              return datetime.datetime.now(ZoneInfo("Asia/Seoul")).isoformat(timespec="seconds")
+
           def get_json(url):
               req = urllib.request.Request(url, headers=HEADERS)
-              with urllib.request.urlopen(req, timeout=20) as r:
-                  if r.status != 200:
-                      raise RuntimeError(f"HTTP {r.status}: {url}")
-                  return json.loads(r.read().decode("utf-8-sig"))
+              with urllib.request.urlopen(req, timeout=15) as response:
+                  if response.status != 200:
+                      raise RuntimeError(f"HTTP {response.status}")
+                  return json.loads(response.read().decode("utf-8-sig"))
 
           def find_value(obj, keys):
               if isinstance(obj, dict):
@@ -58,11 +60,11 @@ jobs:
           def number(value):
               if value is None:
                   return None
-              s = re.sub(r"[^0-9.\\-]", "", str(value).replace(",", ""))
+              cleaned = re.sub(r"[^0-9.\\-]", "", str(value).replace(",", ""))
               try:
-                  n = float(s)
-                  return n if n > 0 else None
-              except ValueError:
+                  parsed = float(cleaned)
+                  return parsed if parsed > 0 else None
+              except (TypeError, ValueError):
                   return None
 
           sources = {
@@ -71,39 +73,54 @@ jobs:
               "usdkrw": "https://api.stock.naver.com/marketindex/exchange/FX_USDKRW"
           }
 
-          output = {
-              "source": "Naver Finance public market-index data",
-              "fetched_at": datetime.datetime.now(ZoneInfo("Asia/Seoul")).isoformat(timespec="seconds"),
-              "international_gold": {},
-              "domestic_gold": {},
-              "usdkrw": {}
-          }
+          os.makedirs("data", exist_ok=True)
+          try:
+              with open("data/live-market.json", encoding="utf-8") as existing_file:
+                  output = json.load(existing_file)
+          except (FileNotFoundError, json.JSONDecodeError):
+              output = {}
 
-          errors = []
+          output.setdefault("source", "Naver Finance public market-index data")
+          for name in sources:
+              if not isinstance(output.get(name), dict):
+                  output[name] = {}
+
+          attempt_at = now_kst()
+          errors = {}
+          successes = []
+
           for name, url in sources.items():
               try:
                   data = get_json(url)
                   price = number(find_value(data, ["closePrice"]))
                   if price is None:
-                      raise RuntimeError("closePrice field missing or invalid")
+                      raise RuntimeError("closePrice missing or invalid")
                   traded_at = find_value(data, ["localTradedAt", "localTradedAtString"])
                   status = find_value(data, ["marketStatus"])
                   output[name] = {
                       "closePrice": price,
                       "localTradedAt": traded_at,
-                      "marketStatus": status
+                      "marketStatus": status,
+                      "fetchedAt": attempt_at
                   }
-                  print(f"{name}: {price} @ {traded_at} ({status})")
+                  successes.append(name)
+                  print(f"OK {name}: {price} @ {traded_at} ({status})")
               except Exception as exc:
-                  errors.append(f"{name}: {exc}")
-                  print(f"ERROR {name}: {exc}")
+                  errors[name] = str(exc)
+                  print(f"WARNING {name}: {exc}; keeping previous valid value")
 
+          output["last_attempt_at"] = attempt_at
+          output["errors"] = errors
+          if successes:
+              output["fetched_at"] = attempt_at
+              with open("data/live-market.json", "w", encoding="utf-8") as target:
+                  json.dump(output, target, ensure_ascii=False, indent=2)
+              print("Updated independently: " + ", ".join(successes))
+          else:
+              print("No source returned a valid quote. Existing published data is left untouched.")
+              raise SystemExit("All quote sources failed; no snapshot was overwritten.")
           if errors:
-              raise SystemExit("Live quote update failed; refusing to publish partial data: " + "; ".join(errors))
-
-          with open("data/live-market.json", "w", encoding="utf-8") as f:
-              json.dump(output, f, ensure_ascii=False, indent=2)
-          print(json.dumps(output, ensure_ascii=False))
+              print("PARTIAL_UPDATE_ERRORS=" + json.dumps(errors, ensure_ascii=False))
           PY
       - name: Commit live market snapshot
         run: |
