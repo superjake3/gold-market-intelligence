@@ -1,7 +1,7 @@
 name: Update Live Market Quotes
 on:
   schedule:
-    - cron: "23 * * * *"
+    - cron: "0 * * * *"
   workflow_dispatch:
 permissions:
   contents: write
