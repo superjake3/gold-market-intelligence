@@ -1,24 +1,24 @@
 {
   "source": "Naver Finance public market-index data",
-  "fetched_at": "2026-11-12T10:20:04+09:00",
+  "fetched_at": "2026-11-12T10:22:36+09:00",
   "international_gold": {
-    "closePrice": 3999.3,
-    "localTradedAt": "2026-11-11T19:09:53-06:00",
+    "closePrice": 3999.2,
+    "localTradedAt": "2026-11-11T19:11:45-06:00",
     "marketStatus": "OPEN",
-    "fetchedAt": "2026-11-12T10:20:04+09:00"
+    "fetchedAt": "2026-11-12T10:22:36+09:00"
   },
   "domestic_gold": {
-    "closePrice": 171710.0,
-    "localTradedAt": "2026-11-12T10:18:58+09:00",
+    "closePrice": 171740.0,
+    "localTradedAt": "2026-11-12T10:20:58+09:00",
     "marketStatus": "OPEN",
-    "fetchedAt": "2026-11-12T10:20:04+09:00"
+    "fetchedAt": "2026-11-12T10:22:36+09:00"
   },
   "usdkrw": {
-    "closePrice": 1335.4,
-    "localTradedAt": "2026-11-12T10:19:44+09:00",
+    "closePrice": 1335.8,
+    "localTradedAt": "2026-11-12T10:20:22+09:00",
     "marketStatus": "OPEN",
-    "fetchedAt": "2026-11-12T10:20:04+09:00"
+    "fetchedAt": "2026-11-12T10:22:36+09:00"
   },
-  "last_attempt_at": "2026-11-12T10:20:04+09:00",
+  "last_attempt_at": "2026-11-12T10:22:36+09:00",
   "errors": {}
 }
