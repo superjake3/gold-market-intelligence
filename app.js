@@ -34,12 +34,19 @@ async function refresh(){
     if(!/^https:\/\//i.test(endpoint)){alert("https:// 로 시작하는 Worker 주소를 입력해 주세요.");return;}
     localStorage.setItem("marketRefreshEndpoint",endpoint);
   }
+  let refreshKey=localStorage.getItem("marketRefreshKey")||"";
+  if(!refreshKey){
+    refreshKey=prompt("Cloudflare Worker에 등록한 REFRESH_KEY를 입력해 주세요.");
+    if(!refreshKey)return;
+    localStorage.setItem("marketRefreshKey",refreshKey.trim());
+    refreshKey=refreshKey.trim();
+  }
   button.disabled=true;
   button.textContent="수집 요청 중…";
   setStatus("새 시세 수집 요청 중");
   try{
     const previous=market.liveFetchedAt||"";
-    const response=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"refresh"})});
+    const response=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json","X-Refresh-Key":refreshKey},body:JSON.stringify({action:"refresh"})});
     const payload=await response.json().catch(()=>({}));
     if(!response.ok)throw Error(payload.error||("요청 실패 · HTTP "+response.status));
     button.textContent="시세 수집 중…";
