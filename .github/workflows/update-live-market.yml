@@ -1,8 +1,8 @@
 name: Update Live Market Quotes
 on:
   schedule:
-    # Every 5 minutes (UTC), re-registered with a new minute offset.
-    - cron: "2-59/5 * * * *"
+    # Every hour on the hour (UTC; also on the hour in Korea).
+    - cron: "0 * * * *"
   push:
     paths:
       - ".github/workflows/update-live-market.yml"
