@@ -26,44 +26,13 @@ async function refreshSavedData(){
 async function refresh(){
   const button=$("refreshBtn");
   if(button.disabled)return;
-  let endpoint=localStorage.getItem("marketRefreshEndpoint")||"";
-  if(!endpoint){
-    endpoint=prompt("Cloudflare Worker 주소를 입력해 주세요. (예: https://gold-refresh.계정.workers.dev)");
-    if(!endpoint)return;
-    endpoint=endpoint.trim().replace(/\/$/,"");
-    if(!/^https:\/\//i.test(endpoint)){alert("https:// 로 시작하는 Worker 주소를 입력해 주세요.");return;}
-    localStorage.setItem("marketRefreshEndpoint",endpoint);
-  }
-  let refreshKey=localStorage.getItem("marketRefreshKey")||"";
-  if(!refreshKey){
-    refreshKey=prompt("Cloudflare Worker에 등록한 REFRESH_KEY를 입력해 주세요.");
-    if(!refreshKey)return;
-    localStorage.setItem("marketRefreshKey",refreshKey.trim());
-    refreshKey=refreshKey.trim();
-  }
   button.disabled=true;
-  button.textContent="수집 요청 중…";
-  setStatus("새 시세 수집 요청 중");
+  button.textContent="저장된 시세 확인 중…";
+  setStatus("GitHub에 저장된 최신 시세 불러오는 중");
   try{
-    const previous=market.liveFetchedAt||"";
-    const response=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json","X-Refresh-Key":refreshKey},body:JSON.stringify({action:"refresh"})});
-    const payload=await response.json().catch(()=>({}));
-    if(!response.ok)throw Error(payload.error||("요청 실패 · HTTP "+response.status));
-    button.textContent="시세 수집 중…";
-    setStatus("GitHub 수집 작업 실행 중");
-    let updated=false;
-    for(let attempt=0;attempt<24;attempt++){
-      await new Promise(resolve=>setTimeout(resolve,5000));
-      await refreshSavedData();
-      if(market.liveFetchedAt&&market.liveFetchedAt!==previous){updated=true;break;}
-    }
-    if(updated){
-      setStatus("새 시세 수집 및 반영 완료",!Object.keys(market.liveErrors||{}).length);
-    }else{
-      setStatus("수집 작업이 아직 진행 중입니다. 잠시 후 다시 확인해 주세요.",false);
-    }
+    await refreshSavedData();
   }catch(error){
-    setStatus(error.message||"새 시세 수집 요청 실패",false);
+    setStatus(error.message||"저장된 시세를 불러오지 못했습니다",false);
   }finally{
     button.textContent="시세 새로고침 ↻";
     button.disabled=false;
