@@ -8,7 +8,7 @@
 </head>
 <body><main class="app-shell">
 <header class="topbar"><div><div class="eyebrow">PERSONAL MARKET MONITOR</div><h1>GOLD <span>&</span> FX</h1></div><button id="refreshBtn" class="primary-btn" type="button">새로고침 ↻</button></header>
-<section class="status-row"><span id="connectionStatus" class="status-dot">● 연결 중</span><span id="lastUpdated">시세를 불러오는 중</span></section><p class="panel-note" id="manualRefreshNote">시세는 약 5분마다 자동 수집됩니다. ‘새로고침’을 누르면 가장 최근에 저장된 시세를 다시 불러옵니다. 새로 수집된 가격은 자동으로 이 화면에 반영됩니다.</p>
+<section class="status-row"><span id="connectionStatus" class="status-dot">● 연결 중</span><span id="lastUpdated">시세를 불러오는 중</span></section><p class="panel-note" id="manualRefreshNote">시세는 자동으로 수집되지 않습니다. ‘시세 새로고침’을 누르면 네이버 공개 시세를 새로 수집하고, 완료된 가격을 이 화면에 반영합니다. 처음 한 번 Cloudflare Worker 주소 설정이 필요합니다.</p>
 <section id="compactView" class="price-grid">
 <article class="price-card gold-card"><div class="card-head"><span>INTERNATIONAL GOLD</span><span class="symbol">GCcv1</span></div><div id="goldUsd" class="price-main">—</div><div class="unit">USD / TROY OZ · COMEX 선물</div><div class="subline">1g <strong id="goldUsdGram">—</strong></div><div class="subline">갱신 시각 <strong id="goldTime">—</strong></div></article>
 <article class="price-card converted-card"><div class="card-head"><span>GOLD · KRW CONVERTED</span><span class="symbol">KRW / g</span></div><div id="convertedGoldTop" class="price-main">—</div><div class="unit">국제 금 원화 환산 기준가</div><div class="subline">국제 금 ÷ 31.1034768 × USD/KRW</div><div class="subline">계산 기준 <strong id="convertedGoldTime">—</strong></div></article>
