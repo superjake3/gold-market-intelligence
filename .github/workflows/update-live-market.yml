@@ -1,11 +1,5 @@
 name: Update Live Market Quotes
 on:
-  schedule:
-    # Every hour on the hour (UTC; also on the hour in Korea).
-    - cron: "0 * * * *"
-  push:
-    paths:
-      - ".github/workflows/update-live-market.yml"
   workflow_dispatch:
 permissions:
   contents: write
