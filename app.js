@@ -11,32 +11,57 @@ async function loadKrxGold(){const d=await fetchJSON("./data/krx-gold.json");con
 function render(){const gold=market.goldUsdOz,fx=market.fx,spot=gold&&fx?gold*fx/OUNCE_GRAM:null,krx=market.krxLiveGold??market.krxGold,live=market.krxLiveGold!==null; $("goldUsd").textContent=USD(gold);$("goldUsdGram").textContent=USD(gold/OUNCE_GRAM);$("goldTime").textContent=localTime(market.goldTime);$("convertedGoldTop").textContent=KRW(spot);const quoteTimes=[market.goldTime,market.fxTime].filter(Boolean).map(v=>new Date(v)).filter(d=>!Number.isNaN(d.getTime()));$("convertedGoldTime").textContent=quoteTimes.length?localTime(new Date(Math.min(...quoteTimes.map(d=>d.getTime()))).toISOString()):"시간 정보 없음";$("fxRate").textContent=fx?fmt(fx,2):"—";$("fxTime").textContent=localTime(market.fxTime);$("domesticGold").textContent=KRW(krx);$("krxDateLabel").textContent=live?(market.krxLiveStatus==="OPEN"?"실시간 ":"최근 시세 ")+localTime(market.krxLiveTime):(market.krxDate?market.krxDate+" 기준 · 일별 종가":"데이터 대기 중");$("krxSourceLabel").textContent=live?(market.krxLiveStatus==="OPEN"?"NAVER · LIVE KRX":"NAVER · LAST QUOTE"):"KRX DAILY CLOSE";$("convertedGold").textContent=KRW(spot);$("goldDon").textContent=KRW(spot*3.75);$("krxDetailValue").textContent=KRW(krx);$("krxDetailDate").textContent=live?(market.krxLiveStatus==="OPEN"?"네이버 KRX 실시간 체결 기준 · ":"네이버 KRX 최근 시세 · ")+localTime(market.krxLiveTime):(market.krxDate?market.krxDate+" 종가":"데이터 대기 중");if(krx&&spot){const gap=krx-spot,p=gap/spot*100;$("premium").textContent=(gap>0?"+":"")+fmt(gap)+"원/g";$("premiumRate").textContent=(p>0?"+":"")+p.toFixed(2)+"%";$("premium").style.color=gap>0?"var(--red)":gap<0?"var(--green)":"var(--text)";$("premiumRate").style.color=gap>0?"var(--red)":gap<0?"var(--green)":"var(--text)";$("gapCaption").textContent=live?"네이버 KRX 시세와 국제 금 환산가 비교":"KRX 일별 종가와 국제 금 환산가 비교 · 기준 시각 상이"}else{$("premium").textContent="—";$("premiumRate").textContent="—";$("gapCaption").textContent="금 가격 데이터를 불러오는 중입니다"}const fetchedAt=market.liveFetchedAt?new Date(market.liveFetchedAt):null;const fetchedAge=fetchedAt&&!Number.isNaN(fetchedAt.getTime())?Date.now()-fetchedAt.getTime():Infinity;const goldAt=market.goldTime?new Date(market.goldTime):null;const goldAge=goldAt&&!Number.isNaN(goldAt.getTime())?Date.now()-goldAt.getTime():Infinity;const quoteDelayed=market.goldMarketStatus==="OPEN"&&goldAge>10*60*1000;const dataDelayed=fetchedAge>10*60*1000;$("lastUpdated").textContent="수집 "+localTime(market.liveFetchedAt)+"\n국제 금 시세 "+localTime(market.goldTime)+" · 환율 "+localTime(market.fxTime);$("lastUpdated").dataset.delay=dataDelayed?"collection":quoteDelayed?"quote":"ok"}
 function drawChart(){const svg=$("goldChart"),p=chartPoints.slice(-120);if(p.length<2){svg.innerHTML='<text x="360" y="110" fill="#9aa99e" text-anchor="middle" font-size="13">앱을 켜 둔 동안 가격 기록을 모읍니다.</text>';return}const a=p.map(x=>x.v),lo=Math.min(...a),hi=Math.max(...a),span=hi-lo||1,x=i=>24+i/(p.length-1)*672,y=v=>185-(v-lo)/span*145,path=p.map((v,i)=>(i?"L":"M")+x(i).toFixed(1)+","+y(v.v).toFixed(1)).join(" "),area=path+" L "+x(p.length-1)+",190 L 24,190 Z";svg.innerHTML='<defs><linearGradient id="fillGold" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#d9b66c" stop-opacity=".28"/><stop offset="1" stop-color="#d9b66c" stop-opacity="0"/></linearGradient></defs><line x1="24" y1="40" x2="696" y2="40" stroke="#2b3a30"/><line x1="24" y1="112" x2="696" y2="112" stroke="#2b3a30"/><line x1="24" y1="190" x2="696" y2="190" stroke="#2b3a30"/><path d="'+area+'" fill="url(#fillGold)"/><path d="'+path+'" fill="none" stroke="#d9b66c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><text x="24" y="18" fill="#9aa99e" font-size="11">'+fmt(hi,2)+'</text><text x="696" y="18" fill="#9aa99e" font-size="11" text-anchor="end">'+fmt(lo,2)+'</text>'}
 function savePoint(){if(market.goldUsdOz){chartPoints.push({t:Date.now(),v:market.goldUsdOz});chartPoints=chartPoints.slice(-720);localStorage.setItem("goldChartPoints",JSON.stringify(chartPoints));drawChart()}}
+async function refreshSavedData(){
+  const results=await Promise.allSettled([loadLiveMarket(),loadKrxGold()]);
+  const liveOk=results[0].status==="fulfilled";
+  render();
+  if(liveOk){
+    savePoint();
+    const partialErrors=Object.keys(market.liveErrors||{}).length>0;
+    setStatus(partialErrors?"일부 시세 갱신 지연":"저장된 최신 시세 표시",!partialErrors);
+  }else{
+    setStatus("저장된 시세를 불러오지 못했습니다",false);
+  }
+}
 async function refresh(){
   const button=$("refreshBtn");
   if(button.disabled)return;
+  let endpoint=localStorage.getItem("marketRefreshEndpoint")||"";
+  if(!endpoint){
+    endpoint=prompt("Cloudflare Worker 주소를 입력해 주세요. (예: https://gold-refresh.계정.workers.dev)");
+    if(!endpoint)return;
+    endpoint=endpoint.trim().replace(/\/$/,"");
+    if(!/^https:\/\//i.test(endpoint)){alert("https:// 로 시작하는 Worker 주소를 입력해 주세요.");return;}
+    localStorage.setItem("marketRefreshEndpoint",endpoint);
+  }
   button.disabled=true;
-  button.textContent="새로고침 중…";
-  setStatus("최신 시세 데이터 확인 중");
-  let liveOk=false;
+  button.textContent="수집 요청 중…";
+  setStatus("새 시세 수집 요청 중");
   try{
-    const results=await Promise.allSettled([loadLiveMarket(),loadKrxGold()]);
-    liveOk=results[0].status==="fulfilled";
-    render();savePoint();
-    const fetchedAt=market.liveFetchedAt?new Date(market.liveFetchedAt):null;
-    const fetchedAge=fetchedAt&&!Number.isNaN(fetchedAt.getTime())?Date.now()-fetchedAt.getTime():Infinity;
-    const goldAt=market.goldTime?new Date(market.goldTime):null;
-    const goldAge=goldAt&&!Number.isNaN(goldAt.getTime())?Date.now()-goldAt.getTime():Infinity;
-    const collectionDelayed=fetchedAge>10*60*1000;
-    const quoteDelayed=market.goldMarketStatus==="OPEN"&&goldAge>10*60*1000;
-    const partialErrors=Object.keys(market.liveErrors||{}).length>0;setStatus(!liveOk?"시세 데이터 연결 실패":partialErrors?"일부 시세 갱신 지연":collectionDelayed?"데이터 수집 지연":quoteDelayed?"국제 금 시세 지연":"최신 저장 시세 반영 완료",liveOk&&!partialErrors&&!collectionDelayed&&!quoteDelayed);
+    const previous=market.liveFetchedAt||"";
+    const response=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"refresh"})});
+    const payload=await response.json().catch(()=>({}));
+    if(!response.ok)throw Error(payload.error||("요청 실패 · HTTP "+response.status));
+    button.textContent="시세 수집 중…";
+    setStatus("GitHub 수집 작업 실행 중");
+    let updated=false;
+    for(let attempt=0;attempt<24;attempt++){
+      await new Promise(resolve=>setTimeout(resolve,5000));
+      await refreshSavedData();
+      if(market.liveFetchedAt&&market.liveFetchedAt!==previous){updated=true;break;}
+    }
+    if(updated){
+      setStatus("새 시세 수집 및 반영 완료",!Object.keys(market.liveErrors||{}).length);
+    }else{
+      setStatus("수집 작업이 아직 진행 중입니다. 잠시 후 다시 확인해 주세요.",false);
+    }
   }catch(error){
-    setStatus(error.message||"시세 데이터 확인 실패",false);
+    setStatus(error.message||"새 시세 수집 요청 실패",false);
   }finally{
-    button.textContent="새로고침 ↻";
+    button.textContent="시세 새로고침 ↻";
     button.disabled=false;
   }
 }
 $("refreshBtn").addEventListener("click",refresh);$("detailBtn").addEventListener("click",()=>{$("compactView").hidden=true;$("toolbar").hidden=true;$("detailView").hidden=false;render();drawChart()});$("backBtn").addEventListener("click",()=>{$("compactView").hidden=false;$("toolbar").hidden=false;$("detailView").hidden=true});
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;$("installBtn").hidden=false});$("installBtn").addEventListener("click",async()=>{if(!deferredInstall)return;deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;$("installBtn").hidden=true});
-if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));try{chartPoints=JSON.parse(localStorage.getItem("goldChartPoints")||"[]")}catch{chartPoints=[]}refresh();
-setInterval(()=>{if(!$("refreshBtn").disabled)refresh()},30000);
+if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));try{chartPoints=JSON.parse(localStorage.getItem("goldChartPoints")||"[]")}catch{chartPoints=[]}refreshSavedData();
