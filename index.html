@@ -7,13 +7,12 @@
 <title>GOLD & FX — Market Dashboard</title>
 </head>
 <body><main class="app-shell">
-<header class="topbar"><div><div class="eyebrow">PERSONAL MARKET MONITOR</div><h1>GOLD <span>&</span> FX</h1></div><button id="refreshBtn" class="primary-btn" type="button">시세 새로고침 ↻</button></header>
-<section class="status-row"><span id="connectionStatus" class="status-dot">● 연결 중</span><span id="lastUpdated">시세를 불러오는 중</span></section><p class="panel-note" id="manualRefreshNote">시세는 각 시장의 거래 상태에 맞춰 1시간마다 자동 수집됩니다. ‘시세 새로고침’은 새 수집을 실행하지 않고 GitHub에 가장 최근 기록된 시세를 다시 불러옵니다. 시장별 실제 거래 시각과 수집 시각은 각각 표시됩니다.</p>
+<header class="topbar"><div><div class="eyebrow">PERSONAL MARKET MONITOR</div><h1>GOLD <span>&</span> FX</h1></div><div class="topbar-actions"><span id="lastUpdated">마지막 확인 · —</span><button id="refreshBtn" class="primary-btn" type="button">시세 새로고침 ↻</button></div></header>
+<section class="status-row"><span id="connectionStatus" class="status-dot">● 연결 중</span></section><p class="panel-note" id="manualRefreshNote">시세는 시장별 거래시간에 맞춰 1시간마다 자동 수집됩니다. 새로고침은 저장된 최신 데이터를 다시 불러옵니다.</p>
 <section id="compactView" class="price-grid">
-<article class="price-card gold-card"><div class="card-head"><span>INTERNATIONAL GOLD</span><span class="symbol">GCcv1</span></div><div id="goldUsd" class="price-main">—</div><div class="unit">USD / TROY OZ · COMEX 선물</div><div class="subline">1g <strong id="goldUsdGram">—</strong></div><div class="subline">갱신 시각 <strong id="goldTime">—</strong></div></article>
-<article class="price-card converted-card"><div class="card-head"><span>GOLD · KRW CONVERTED</span><span class="symbol">KRW / g</span></div><div id="convertedGoldTop" class="price-main">—</div><div class="unit">국제 금 원화 환산 기준가</div><div class="subline">국제 금 ÷ 31.1034768 × USD/KRW</div><div class="subline">계산 기준 <strong id="convertedGoldTime">—</strong></div></article>
-<article class="price-card fx-card"><div class="card-head"><span>US DOLLAR</span><span class="symbol">USD/KRW</span></div><div id="fxRate" class="price-main">—</div><div class="unit">KRW / USD · 하나은행 고시환율</div><div class="subline">갱신 시각 <strong id="fxTime">—</strong></div></article>
-<article class="price-card domestic-card"><div class="card-head"><span>KRX GOLD MARKET</span><span class="symbol">KRW / g</span></div><div id="domesticGold" class="price-main">—</div><div id="krxSourceLabel" class="unit">NAVER LIVE KRX</div><div class="subline">시세 시각 <strong id="krxDateLabel">불러오는 중</strong></div></article>
+<article class="price-card gold-card"><div class="card-head"><span>INTERNATIONAL GOLD</span><span class="symbol">USD / OZ</span></div><div id="goldUsd" class="price-main">—</div><div class="unit">USD / 트로이온스</div><div class="subline">국제 금 시장의 기준 가격</div></article>
+<article class="price-card fx-card"><div class="card-head"><span>US DOLLAR</span><span class="symbol">USD / KRW</span></div><div id="fxRate" class="price-main">—</div><div class="unit">KRW / USD</div><div class="subline">1달러당 원화 환율</div></article>
+<article class="price-card domestic-card"><div class="card-head"><span>DOMESTIC GOLD</span><span class="symbol">KRW / g</span></div><div id="domesticGold" class="price-main">—</div><div class="unit">KRW / g · 국내 금 시세</div><div class="subline">국내 금시장 기준 가격</div></article>
 </section>
 <section id="toolbar" class="toolbar"><button id="detailBtn" class="primary-btn">상세 분석 보기 <span>↗</span></button><button id="installBtn" class="secondary-btn" hidden>홈 화면에 추가</button></section>
 <section id="detailView" class="detail-view" hidden>
