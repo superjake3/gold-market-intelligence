@@ -1,8 +1,8 @@
 name: Update Live Market Quotes
 on:
   schedule:
-    # Every 5 minutes (UTC); GitHub Actions may start scheduled jobs a little late.
-    - cron: "4-59/5 * * * *"
+    # Every 5 minutes (UTC), re-registered with a new minute offset.
+    - cron: "2-59/5 * * * *"
   push:
     paths:
       - ".github/workflows/update-live-market.yml"
