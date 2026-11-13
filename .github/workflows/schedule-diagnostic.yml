@@ -3,7 +3,8 @@ name: Schedule Trigger Diagnostic
 on:
   schedule:
     # Re-register the diagnostic schedule with a new minute offset.
-    - cron: "17 * * * *"
+    # Run independently of the quote workflow to expose scheduler delays.
+    - cron: "23,53 * * * *"
   workflow_dispatch:
 
 permissions:
