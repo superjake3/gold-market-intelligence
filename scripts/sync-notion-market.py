@@ -82,68 +82,114 @@ def fmt_change(item, prefix=""):
 def update_notion_board(payload):
     page_id = os.environ.get("NOTION_DASHBOARD_PAGE_ID", "414f1b8c-fe0c-8086-b6a9-ca61bf851e9e")
     base = "https://api.notion.com/v1"
-    cursor = None
-    target = None
-    while True:
-        url = f"{base}/blocks/{page_id}/children?page_size=100"
-        if cursor:
-            url += f"&start_cursor={cursor}"
-        req = urllib.request.Request(url, headers=HEADERS)
-        with urllib.request.urlopen(req, timeout=30) as response:
-            blocks = json.load(response)
-        for block in blocks.get("results", []):
-            kind = block.get("type")
-            body = block.get(kind, {}) if kind else {}
-            rich = body.get("rich_text", [])
-            text_content = "".join(x.get("plain_text", "") for x in rich)
-            if kind == "callout" and "PRICE MONITOR" in text_content:
-                target = block["id"]
-                break
-        if target or not blocks.get("has_more"):
-            break
-        cursor = blocks.get("next_cursor")
-    if not target:
-        raise RuntimeError("Dashboard marker block not found; Notion board was not updated.")
+
+    def get_children(parent_id):
+        results, cursor = [], None
+        while True:
+            url = f"{base}/blocks/{parent_id}/children?page_size=100"
+            if cursor:
+                url += f"&start_cursor={cursor}"
+            req = urllib.request.Request(url, headers=HEADERS)
+            with urllib.request.urlopen(req, timeout=30) as response:
+                data = json.load(response)
+            results.extend(data.get("results", []))
+            if not data.get("has_more"):
+                return results
+            cursor = data.get("next_cursor")
+
+    # Locate the three metric cards inside the Notion column layout,
+    # plus the small metadata line below them.
+    blocks = get_children(page_id)
+    index = 0
+    while index < len(blocks):
+        block = blocks[index]
+        if block.get("type") == "column_list":
+            for column in get_children(block["id"]):
+                if column.get("type") == "column":
+                    blocks.extend(get_children(column["id"]))
+        index += 1
+
+    targets = {}
+    footer = None
+    for block in blocks:
+        kind = block.get("type")
+        body = block.get(kind, {}) if kind else {}
+        rich = body.get("rich_text", [])
+        text_content = "".join(x.get("plain_text", "") for x in rich)
+        if kind == "callout":
+            for marker in ("USD / KRW", "GOLD / OUNCE", "GOLD / GRAM"):
+                if marker in text_content:
+                    targets[marker] = block["id"]
+        elif kind == "paragraph" and "AS OF" in text_content:
+            footer = block["id"]
+
+    required = ("USD / KRW", "GOLD / OUNCE", "GOLD / GRAM")
+    missing = [name for name in required if name not in targets]
+    if missing or not footer:
+        raise RuntimeError(
+            "Dashboard metric blocks not found: "
+            + ", ".join(missing or [])
+            + ("; metadata line missing" if not footer else "")
+        )
 
     latest = payload.get("latest") or {}
     changes = payload.get("changes") or {}
     previous_row = payload.get("previous") or {}
+
     def rt(text, bold=False, color=None):
         item = {"type": "text", "text": {"content": text}}
         annotations = {}
-        if bold: annotations["bold"] = True
-        if color: annotations["color"] = color
-        if annotations: item["annotations"] = annotations
+        if bold:
+            annotations["bold"] = True
+        if color:
+            annotations["color"] = color
+        if annotations:
+            item["annotations"] = annotations
         return item
 
-    rich = [
-        rt("PRICE MONITOR  /  DAILY ENTRY\n", True, "gray"),
-        rt("USD / KRW   ", True, "gray"),
-        rt(fmt_number(latest.get("usdkrw"), "₩"), True),
-        rt("    " + fmt_change(changes.get("usdkrw"), "₩") + "\n", False,
-           "green" if (changes.get("usdkrw") or {}).get("absolute", 0) < 0 else "red"),
-        rt("GOLD / OUNCE   ", True, "gray"),
-        rt(fmt_number(latest.get("gold_usd_oz"), "$", "/oz"), True),
-        rt("    " + fmt_change(changes.get("gold_usd_oz"), "$") + "\n", False,
-           "green" if (changes.get("gold_usd_oz") or {}).get("absolute", 0) < 0 else "red"),
-        rt("GOLD / GRAM   ", True, "gray"),
-        rt(fmt_number(latest.get("gold_krw_g"), "₩", "/g"), True),
-        rt("    " + fmt_change(changes.get("gold_krw_g"), "₩") + "\n", False,
-           "green" if (changes.get("gold_krw_g") or {}).get("absolute", 0) < 0 else "red"),
-        rt("AS OF  " + str(latest.get("date", "—")) +
-           "    /    PREVIOUS  " + str(previous_row.get("date", "—")) + "\n", False, "gray"),
-        rt("AUTO-SYNC  ·  SOURCE: NOTION ENTRY", False, "gray"),
+    metrics = [
+        ("USD / KRW", "usdkrw", "₩", ""),
+        ("GOLD / OUNCE", "gold_usd_oz", "$", "/oz"),
+        ("GOLD / GRAM", "gold_krw_g", "₩", "/g"),
     ]
-    patch = {"callout": {"rich_text": rich}}
+
+    for label, key, prefix, suffix in metrics:
+        change_item = changes.get(key)
+        delta = (change_item or {}).get("absolute")
+        change_color = "green" if delta is not None and delta < 0 else (
+            "red" if delta is not None and delta > 0 else "gray"
+        )
+        rich = [
+            rt(label, False, "gray"),
+            rt("\n" + fmt_number(latest.get(key), prefix, suffix), True),
+            rt("\n" + fmt_change(change_item, prefix), False, change_color),
+        ]
+        patch = {"callout": {"rich_text": rich}}
+        req = urllib.request.Request(
+            f"{base}/blocks/{targets[label]}",
+            data=json.dumps(patch, ensure_ascii=False).encode("utf-8"),
+            headers=HEADERS,
+            method="PATCH",
+        )
+        with urllib.request.urlopen(req, timeout=30) as response:
+            response.read()
+
+    footer_text = (
+        "AS OF " + str(latest.get("date", "—"))
+        + "  /  PREVIOUS " + str(previous_row.get("date", "—"))
+        + "  ·  AUTO-SYNC EVERY 5 MIN"
+    )
+    patch = {"paragraph": {"rich_text": [rt(footer_text, False, "gray")]}}
     req = urllib.request.Request(
-        f"{base}/blocks/{target}",
+        f"{base}/blocks/{footer}",
         data=json.dumps(patch, ensure_ascii=False).encode("utf-8"),
         headers=HEADERS,
         method="PATCH",
     )
     with urllib.request.urlopen(req, timeout=30) as response:
         response.read()
-    print("Updated Notion MARKET BOARD block.")
+
+    print("Updated all three Notion MARKET MONITOR cards and metadata.")
 
 out = Path("data/notion-market.json")
 out.parent.mkdir(exist_ok=True)
