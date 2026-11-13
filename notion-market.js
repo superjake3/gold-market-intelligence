@@ -11,7 +11,7 @@ function ensurePanel(){
  const table=el("div","panel");table.style.overflowX="auto";
  const t=el("table");t.id="notionHistoryTable";t.style.cssText="width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap";
  table.append(t);section.append(head,stamp,table);
- const grid=document.getElementById("price-grid");if(grid&&grid.parentNode)grid.parentNode.insertBefore(section,grid.nextSibling);else document.querySelector("main")?.append(section);
+ const grid=document.getElementById("compactView");if(grid&&grid.parentNode)grid.parentNode.insertBefore(section,grid.nextSibling);else document.querySelector("main")?.append(section);
 }
 function setCard(selector,value,detail){const card=document.querySelector(selector);if(!card)return;const main=card.querySelector(".price-main");const sub=card.querySelector(".subline");if(main)main.textContent=value;if(sub)sub.textContent=detail}
 function render(data){
