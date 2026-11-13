@@ -58,6 +58,74 @@ payload = {
     "history": all_rows[:7],
     "record_count": len(all_rows),
 }
+
+def fmt_number(value, prefix="", suffix=""):
+    if value is None: return "—"
+    if isinstance(value, float) and value.is_integer(): value = int(value)
+    return f"{prefix}{value:,.0f}{suffix}"
+
+def fmt_change(item, prefix="", suffix=""):
+    if not item: return "전일 기록 없음"
+    amount = item["absolute"]
+    sign = "+" if amount > 0 else ""
+    arrow = "▲" if amount > 0 else ("▼" if amount < 0 else "—")
+    return f"{arrow} {sign}{prefix}{amount:,.2f}{suffix} ({sign}{item['percent']:.2f}%)"
+
+def update_notion_board(payload):
+    page_id = os.environ.get("NOTION_DASHBOARD_PAGE_ID", "414f1b8c-fe0c-8086-b6a9-ca61bf851e9e")
+    base = "https://api.notion.com/v1"
+    cursor = None
+    target = None
+    while True:
+        url = f"{base}/blocks/{page_id}/children?page_size=100"
+        if cursor: url += f"&start_cursor={cursor}"
+        req = urllib.request.Request(url, headers=HEADERS)
+        with urllib.request.urlopen(req, timeout=30) as response:
+            blocks = json.load(response)
+        for block in blocks.get("results", []):
+            kind = block.get("type")
+            body = block.get(kind, {}) if kind else {}
+            rich = body.get("rich_text", [])
+            text_content = "".join(x.get("plain_text", "") for x in rich)
+            if kind == "callout" and "MARKET_BOARD_SYNC" in text_content:
+                target = block["id"]
+                break
+        if target or not blocks.get("has_more"): break
+        cursor = blocks.get("next_cursor")
+    if not target:
+        raise RuntimeError("Dashboard marker block not found; Notion board was not updated.")
+
+    latest = payload.get("latest") or {}
+    changes = payload.get("changes") or {}
+    prev = payload.get("previous") or {}
+    board_text = (
+        "PRICE BOARD · 전일 입력 기록 대비\n"
+        f"달러 환율  {fmt_number(latest.get('usdkrw'), '₩')}  ·  {fmt_change(changes.get('usdkrw'), '₩')}\n"
+        f"국제 금  {fmt_number(latest.get('gold_usd_oz'), '
+out.parent.mkdir(exist_ok=True)
+out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+update_notion_board(payload)
+print(f"Synced {len(all_rows)} records; latest={latest}")
+, '/oz')}  ·  {fmt_change(changes.get('gold_usd_oz'), '
+out.parent.mkdir(exist_ok=True)
+out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+print(f"Synced {len(all_rows)} records; latest={latest}")
+)}\n"
+        f"국내 금  {fmt_number(latest.get('gold_krw_g'), '₩', '/g')}  ·  {fmt_change(changes.get('gold_krw_g'), '₩')}\n"
+        f"기준일 {latest.get('date', '—')}  |  비교 기준 {prev.get('date', '이전 기록 없음')}\n"
+        "MARKET_BOARD_SYNC"
+    )
+    patch = {"callout": {"rich_text": [{"type": "text", "text": {"content": board_text}}]}}
+    req = urllib.request.Request(
+        f"{base}/blocks/{target}",
+        data=json.dumps(patch, ensure_ascii=False).encode("utf-8"),
+        headers=HEADERS,
+        method="PATCH",
+    )
+    with urllib.request.urlopen(req, timeout=30) as response:
+        response.read()
+    print("Updated Notion MARKET BOARD block.")
+
 out = Path("data/notion-market.json")
 out.parent.mkdir(exist_ok=True)
 out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
