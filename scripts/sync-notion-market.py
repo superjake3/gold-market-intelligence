@@ -96,7 +96,7 @@ def update_notion_board(payload):
             body = block.get(kind, {}) if kind else {}
             rich = body.get("rich_text", [])
             text_content = "".join(x.get("plain_text", "") for x in rich)
-            if kind == "callout" and "PRICE MONITOR / DAILY ENTRY" in text_content:
+            if kind == "callout" and "PRICE MONITOR" in text_content:
                 target = block["id"]
                 break
         if target or not blocks.get("has_more"):
