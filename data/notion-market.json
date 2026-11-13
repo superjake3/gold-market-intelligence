@@ -1,9 +1,58 @@
 {
   "source": "Notion 🌱 한 줄 일기",
-  "latest": null,
-  "previous": null,
-  "changes": {},
-  "history": [],
-  "record_count": 0,
-  "fetched_at": null
+  "data_source_id": "70d8c1da-ef61-419b-ae8c-0ae3aa8d4a35",
+  "fetched_at": "2026-11-13T02:25:33.748954+00:00",
+  "latest": {
+    "date": "2026-11-13",
+    "usdkrw": 1333.0,
+    "gold_usd_oz": 3892.0,
+    "gold_krw_g": 167000.0
+  },
+  "previous": {
+    "date": "2026-11-12",
+    "usdkrw": 1335.0,
+    "gold_usd_oz": 3999.0,
+    "gold_krw_g": 171740.0
+  },
+  "changes": {
+    "usdkrw": {
+      "absolute": -2.0,
+      "percent": -0.1498
+    },
+    "gold_usd_oz": {
+      "absolute": -107.0,
+      "percent": -2.6757
+    },
+    "gold_krw_g": {
+      "absolute": -4740.0,
+      "percent": -2.76
+    }
+  },
+  "history": [
+    {
+      "date": "2026-11-13",
+      "usdkrw": 1333.0,
+      "gold_usd_oz": 3892.0,
+      "gold_krw_g": 167000.0
+    },
+    {
+      "date": "2026-11-12",
+      "usdkrw": 1335.0,
+      "gold_usd_oz": 3999.0,
+      "gold_krw_g": 171740.0
+    },
+    {
+      "date": "2026-11-11",
+      "usdkrw": 1338.0,
+      "gold_usd_oz": 4040.0,
+      "gold_krw_g": 173970.0
+    },
+    {
+      "date": "2026-11-10",
+      "usdkrw": 1337.0,
+      "gold_usd_oz": 4123.0,
+      "gold_krw_g": 178770.0
+    }
+  ],
+  "record_count": 4
 }
