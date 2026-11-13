@@ -96,7 +96,7 @@ def update_notion_board(payload):
             body = block.get(kind, {}) if kind else {}
             rich = body.get("rich_text", [])
             text_content = "".join(x.get("plain_text", "") for x in rich)
-            if kind == "callout" and "PRICE BOARD · 전일 입력 기록 대비" in text_content:
+            if kind == "callout" and "PRICE MONITOR / DAILY ENTRY" in text_content:
                 target = block["id"]
                 break
         if target or not blocks.get("has_more"):
@@ -108,16 +108,33 @@ def update_notion_board(payload):
     latest = payload.get("latest") or {}
     changes = payload.get("changes") or {}
     previous_row = payload.get("previous") or {}
-    lines = [
-        "PRICE BOARD · 전일 입력 기록 대비",
-        "달러 환율  " + fmt_number(latest.get("usdkrw"), "₩") + "  ·  " + fmt_change(changes.get("usdkrw"), "₩"),
-        "국제 금  " + fmt_number(latest.get("gold_usd_oz"), "$", "/oz") + "  ·  " + fmt_change(changes.get("gold_usd_oz"), "$"),
-        "국내 금  " + fmt_number(latest.get("gold_krw_g"), "₩", "/g") + "  ·  " + fmt_change(changes.get("gold_krw_g"), "₩"),
-        "기준일 " + str(latest.get("date", "—")) + "  |  비교 기준 " + str(previous_row.get("date", "이전 기록 없음")),
-        "자동 갱신 · Notion 입력 데이터 기준",
+    def rt(text, bold=False, color=None):
+        item = {"type": "text", "text": {"content": text}}
+        annotations = {}
+        if bold: annotations["bold"] = True
+        if color: annotations["color"] = color
+        if annotations: item["annotations"] = annotations
+        return item
+
+    rich = [
+        rt("PRICE MONITOR  /  DAILY ENTRY\n", True, "gray"),
+        rt("USD / KRW   ", True, "gray"),
+        rt(fmt_number(latest.get("usdkrw"), "₩"), True),
+        rt("    " + fmt_change(changes.get("usdkrw"), "₩") + "\n", False,
+           "green" if (changes.get("usdkrw") or {}).get("absolute", 0) < 0 else "red"),
+        rt("GOLD / OUNCE   ", True, "gray"),
+        rt(fmt_number(latest.get("gold_usd_oz"), "$", "/oz"), True),
+        rt("    " + fmt_change(changes.get("gold_usd_oz"), "$") + "\n", False,
+           "green" if (changes.get("gold_usd_oz") or {}).get("absolute", 0) < 0 else "red"),
+        rt("GOLD / GRAM   ", True, "gray"),
+        rt(fmt_number(latest.get("gold_krw_g"), "₩", "/g"), True),
+        rt("    " + fmt_change(changes.get("gold_krw_g"), "₩") + "\n", False,
+           "green" if (changes.get("gold_krw_g") or {}).get("absolute", 0) < 0 else "red"),
+        rt("AS OF  " + str(latest.get("date", "—")) +
+           "    /    PREVIOUS  " + str(previous_row.get("date", "—")) + "\n", False, "gray"),
+        rt("AUTO-SYNC  ·  SOURCE: NOTION ENTRY", False, "gray"),
     ]
-    board_text = chr(10).join(lines)
-    patch = {"callout": {"rich_text": [{"type": "text", "text": {"content": board_text}}]}}
+    patch = {"callout": {"rich_text": rich}}
     req = urllib.request.Request(
         f"{base}/blocks/{target}",
         data=json.dumps(patch, ensure_ascii=False).encode("utf-8"),
