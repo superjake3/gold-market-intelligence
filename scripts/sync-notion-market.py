@@ -8,9 +8,11 @@ HEADERS = {"Authorization": f"Bearer {TOKEN}", "Notion-Version": "2025-09-03", "
 
 def request(cursor=None):
     body = {"page_size": 100}
-    if cursor: body["start_cursor"] = cursor
+    if cursor:
+        body["start_cursor"] = cursor
     req = urllib.request.Request(API, data=json.dumps(body).encode(), headers=HEADERS, method="POST")
-    with urllib.request.urlopen(req, timeout=30) as r: return json.load(r)
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return json.load(r)
 
 def number(props, key):
     p = props.get(key, {})
@@ -35,7 +37,8 @@ while True:
         if any(v is not None for v in values.values()):
             created = page.get("created_time", "")
             all_rows.append({"date": row_date(props, created), **values})
-    if not data.get("has_more"): break
+    if not data.get("has_more"):
+        break
     cursor = data.get("next_cursor")
 
 all_rows.sort(key=lambda r: r["date"], reverse=True)
@@ -43,9 +46,11 @@ latest = all_rows[0] if all_rows else None
 previous = all_rows[1] if len(all_rows) > 1 else None
 
 def change(key):
-    if not latest or not previous: return None
+    if not latest or not previous:
+        return None
     a, b = latest.get(key), previous.get(key)
-    if a is None or b in (None, 0): return None
+    if a is None or b in (None, 0):
+        return None
     return {"absolute": round(a-b, 4), "percent": round((a-b)/b*100, 4)}
 
 payload = {
@@ -60,16 +65,19 @@ payload = {
 }
 
 def fmt_number(value, prefix="", suffix=""):
-    if value is None: return "—"
-    if isinstance(value, float) and value.is_integer(): value = int(value)
+    if value is None:
+        return "—"
+    if isinstance(value, float) and value.is_integer():
+        value = int(value)
     return f"{prefix}{value:,.0f}{suffix}"
 
-def fmt_change(item, prefix="", suffix=""):
-    if not item: return "전일 기록 없음"
+def fmt_change(item, prefix=""):
+    if not item:
+        return "전일 기록 없음"
     amount = item["absolute"]
     sign = "+" if amount > 0 else ""
     arrow = "▲" if amount > 0 else ("▼" if amount < 0 else "—")
-    return f"{arrow} {sign}{prefix}{amount:,.2f}{suffix} ({sign}{item['percent']:.2f}%)"
+    return f"{arrow} {sign}{prefix}{amount:,.2f} ({sign}{item['percent']:.2f}%)"
 
 def update_notion_board(payload):
     page_id = os.environ.get("NOTION_DASHBOARD_PAGE_ID", "414f1b8c-fe0c-8086-b6a9-ca61bf851e9e")
@@ -78,7 +86,8 @@ def update_notion_board(payload):
     target = None
     while True:
         url = f"{base}/blocks/{page_id}/children?page_size=100"
-        if cursor: url += f"&start_cursor={cursor}"
+        if cursor:
+            url += f"&start_cursor={cursor}"
         req = urllib.request.Request(url, headers=HEADERS)
         with urllib.request.urlopen(req, timeout=30) as response:
             blocks = json.load(response)
@@ -90,31 +99,24 @@ def update_notion_board(payload):
             if kind == "callout" and "MARKET_BOARD_SYNC" in text_content:
                 target = block["id"]
                 break
-        if target or not blocks.get("has_more"): break
+        if target or not blocks.get("has_more"):
+            break
         cursor = blocks.get("next_cursor")
     if not target:
         raise RuntimeError("Dashboard marker block not found; Notion board was not updated.")
 
     latest = payload.get("latest") or {}
     changes = payload.get("changes") or {}
-    prev = payload.get("previous") or {}
-    board_text = (
-        "PRICE BOARD · 전일 입력 기록 대비\n"
-        f"달러 환율  {fmt_number(latest.get('usdkrw'), '₩')}  ·  {fmt_change(changes.get('usdkrw'), '₩')}\n"
-        f"국제 금  {fmt_number(latest.get('gold_usd_oz'), '
-out.parent.mkdir(exist_ok=True)
-out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-update_notion_board(payload)
-print(f"Synced {len(all_rows)} records; latest={latest}")
-, '/oz')}  ·  {fmt_change(changes.get('gold_usd_oz'), '
-out.parent.mkdir(exist_ok=True)
-out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-print(f"Synced {len(all_rows)} records; latest={latest}")
-)}\n"
-        f"국내 금  {fmt_number(latest.get('gold_krw_g'), '₩', '/g')}  ·  {fmt_change(changes.get('gold_krw_g'), '₩')}\n"
-        f"기준일 {latest.get('date', '—')}  |  비교 기준 {prev.get('date', '이전 기록 없음')}\n"
-        "MARKET_BOARD_SYNC"
-    )
+    previous_row = payload.get("previous") or {}
+    lines = [
+        "PRICE BOARD · 전일 입력 기록 대비",
+        "달러 환율  " + fmt_number(latest.get("usdkrw"), "₩") + "  ·  " + fmt_change(changes.get("usdkrw"), "₩"),
+        "국제 금  " + fmt_number(latest.get("gold_usd_oz"), "$", "/oz") + "  ·  " + fmt_change(changes.get("gold_usd_oz"), "$"),
+        "국내 금  " + fmt_number(latest.get("gold_krw_g"), "₩", "/g") + "  ·  " + fmt_change(changes.get("gold_krw_g"), "₩"),
+        "기준일 " + str(latest.get("date", "—")) + "  |  비교 기준 " + str(previous_row.get("date", "이전 기록 없음")),
+        "MARKET_BOARD_SYNC",
+    ]
+    board_text = chr(10).join(lines)
     patch = {"callout": {"rich_text": [{"type": "text", "text": {"content": board_text}}]}}
     req = urllib.request.Request(
         f"{base}/blocks/{target}",
@@ -129,4 +131,5 @@ print(f"Synced {len(all_rows)} records; latest={latest}")
 out = Path("data/notion-market.json")
 out.parent.mkdir(exist_ok=True)
 out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+update_notion_board(payload)
 print(f"Synced {len(all_rows)} records; latest={latest}")
