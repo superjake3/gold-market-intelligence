@@ -1,7 +1,8 @@
 name: Update Live Market Quotes
 on:
   schedule:
-    - cron: "17 * * * *"
+    # Primary hourly check plus a half-hour recovery run if GitHub misses/delays one.
+    - cron: "17,47 * * * *"
   workflow_dispatch:
 permissions:
   contents: write
@@ -199,13 +200,38 @@ jobs:
             echo "No quote changes to publish."
             exit 0
           fi
+          git diff --cached --check
+          python -m json.tool data/live-market.json > /dev/null
+          if [ -f data/live-market-history.json ]; then
+            python -m json.tool data/live-market-history.json > /dev/null
+          fi
           git commit -m "Update live market quotes"
-          for attempt in 1 2 3; do
-            git pull --rebase origin main
-            if git push; then
+
+          # A transient GitHub 5xx can reject a push even after quote collection
+          # succeeded. Refresh the remote before every retry so an ambiguous
+          # successful push cannot create a duplicate or non-fast-forward commit.
+          delays=(5 10 20 30 45 60)
+          for attempt in 1 2 3 4 5 6; do
+            echo "Publish attempt $attempt/6"
+            if ! git fetch origin main; then
+              echo "Fetch failed on attempt $attempt."
+            elif ! git rebase origin/main; then
+              echo "Rebase failed; aborting to avoid publishing conflicting data."
+              git rebase --abort || true
+              exit 1
+            elif git push origin HEAD:main; then
+              echo "Live market data published successfully."
               exit 0
+            else
+              echo "Push attempt $attempt failed."
             fi
-            echo "Push attempt $attempt failed; retrying."
-            sleep 2
+
+            if [ "$attempt" -lt 6 ]; then
+              delay="${delays[$((attempt-1))]}"
+              echo "Retrying in ${delay}s."
+              sleep "$delay"
+            fi
           done
+
+          echo "::error::Unable to publish live market data after 6 attempts."
           exit 1
