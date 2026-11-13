@@ -77,7 +77,7 @@ def fmt_change(item, prefix=""):
     amount = item["absolute"]
     sign = "+" if amount > 0 else ""
     arrow = "▲" if amount > 0 else ("▼" if amount < 0 else "—")
-    return f"{arrow} {sign}{prefix}{amount:,.2f} ({sign}{item['percent']:.2f}%)"
+    return f"{arrow} {prefix}{abs(amount):,.0f} ({sign}{item['percent']:.2f}%)"
 
 def update_notion_board(payload):
     page_id = os.environ.get("NOTION_DASHBOARD_PAGE_ID", "414f1b8c-fe0c-8086-b6a9-ca61bf851e9e")
@@ -96,7 +96,7 @@ def update_notion_board(payload):
             body = block.get(kind, {}) if kind else {}
             rich = body.get("rich_text", [])
             text_content = "".join(x.get("plain_text", "") for x in rich)
-            if kind == "callout" and "MARKET_BOARD_SYNC" in text_content:
+            if kind == "callout" and "PRICE BOARD · 전일 입력 기록 대비" in text_content:
                 target = block["id"]
                 break
         if target or not blocks.get("has_more"):
@@ -114,7 +114,7 @@ def update_notion_board(payload):
         "국제 금  " + fmt_number(latest.get("gold_usd_oz"), "$", "/oz") + "  ·  " + fmt_change(changes.get("gold_usd_oz"), "$"),
         "국내 금  " + fmt_number(latest.get("gold_krw_g"), "₩", "/g") + "  ·  " + fmt_change(changes.get("gold_krw_g"), "₩"),
         "기준일 " + str(latest.get("date", "—")) + "  |  비교 기준 " + str(previous_row.get("date", "이전 기록 없음")),
-        "MARKET_BOARD_SYNC",
+        "자동 갱신 · Notion 입력 데이터 기준",
     ]
     board_text = chr(10).join(lines)
     patch = {"callout": {"rich_text": [{"type": "text", "text": {"content": board_text}}]}}
