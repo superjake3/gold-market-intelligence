@@ -148,6 +148,10 @@ def main():
         api_request(f"{API}/blocks/{targets[label]}", "PATCH", {
             "callout": {"rich_text": rich_text}
         })
+        # Remove the initial placeholder child paragraphs; all live values now live in the callout itself.
+        children = api_request(f"{API}/blocks/{targets[label]}/children?page_size=100").get("results", [])
+        for child in children:
+            api_request(f"{API}/blocks/{child['id']}", "DELETE")
 
     if latest:
         stamp = latest["created_time"].replace("T", " ").replace("Z", " UTC")
