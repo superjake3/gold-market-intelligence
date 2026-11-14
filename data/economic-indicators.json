@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "fetched_at": "2026-11-13T14:58:48+09:00",
+  "fetched_at": "2026-11-14T14:47:39+09:00",
   "note": "각 지표의 latest.date는 실제 통계 기준일이며 fetched_at은 수집 시각입니다.",
   "indicators": {
     "us_10y_yield": {
@@ -11,10 +11,6 @@
       "source": "Federal Reserve Economic Data (FRED)",
       "source_url": "https://fred.stlouisfed.org/series/DGS10",
       "observations": [
-        {
-          "date": "2025-04-07",
-          "value": 4.15
-        },
         {
           "date": "2025-04-08",
           "value": 4.26
@@ -1610,15 +1606,19 @@
         {
           "date": "2026-11-10",
           "value": 4.98
+        },
+        {
+          "date": "2026-11-12",
+          "value": 5.1
         }
       ],
       "latest": {
-        "date": "2026-11-10",
-        "value": 4.98
+        "date": "2026-11-12",
+        "value": 5.1
       },
       "previous": {
-        "date": "2026-11-09",
-        "value": 4.88
+        "date": "2026-11-10",
+        "value": 4.98
       }
     },
     "us_10y_real_yield": {
@@ -1629,10 +1629,6 @@
       "source": "Federal Reserve Economic Data (FRED)",
       "source_url": "https://fred.stlouisfed.org/series/DFII10",
       "observations": [
-        {
-          "date": "2025-04-07",
-          "value": 1.96
-        },
         {
           "date": "2025-04-08",
           "value": 2.04
@@ -3228,15 +3224,19 @@
         {
           "date": "2026-11-10",
           "value": 2.78
+        },
+        {
+          "date": "2026-11-12",
+          "value": 2.86
         }
       ],
       "latest": {
-        "date": "2026-11-10",
-        "value": 2.78
+        "date": "2026-11-12",
+        "value": 2.86
       },
       "previous": {
-        "date": "2026-11-09",
-        "value": 2.66
+        "date": "2026-11-10",
+        "value": 2.78
       }
     },
     "usd_broad_index": {
