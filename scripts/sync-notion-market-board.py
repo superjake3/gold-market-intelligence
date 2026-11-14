@@ -2,7 +2,7 @@ import json
 import os
 import urllib.request
 import datetime
-from decimal import Decimal
+from zoneinfo import ZoneInfo
 
 TOKEN = os.environ["NOTION_TOKEN"]
 DATA_SOURCE_ID = os.environ.get("NOTION_DATA_SOURCE_ID", "70d8c1da-ef61-419b-ae8c-0ae3aa8d4a35")
@@ -154,7 +154,7 @@ def main():
             api_request(f"{API}/blocks/{child['id']}", "DELETE")
 
     if latest:
-        stamp = latest["created_time"].replace("T", " ").replace("Z", " UTC")
+        stamp = datetime.datetime.fromisoformat(latest["created_time"].replace("Z", "+00:00")).astimezone(ZoneInfo("Asia/Seoul")).strftime("%Y-%m-%d %H:%M KST")
         status = f"UPDATED FROM 기록 · {stamp} · PREVIOUS ENTRY COMPARED"
     else:
         status = "기록 데이터 입력 대기 중"
