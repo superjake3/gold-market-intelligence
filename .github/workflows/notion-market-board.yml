@@ -1,0 +1,36 @@
+name: Update Notion Market Board
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/sync-notion-market-board.py"
+      - ".github/workflows/notion-market-board.yml"
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: notion-market-board
+  cancel-in-progress: true
+
+jobs:
+  update-board:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Update Notion MARKET BOARD
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATA_SOURCE_ID: "70d8c1da-ef61-419b-ae8c-0ae3aa8d4a35"
+          NOTION_DASHBOARD_PAGE_ID: "414f1b8c-fe0c-8086-b6a9-ca61bf851e9e"
+        run: python scripts/sync-notion-market-board.py
