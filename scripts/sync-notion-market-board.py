@@ -142,8 +142,8 @@ def main():
         line, color = metric_line(current, prior, prefix, suffix)
         rich_text = [
             rich(label, color="gray"),
-            rich("\\n" + price_text(current, prefix, suffix), bold=True),
-            rich("\\n" + line, color=color),
+            rich("\n" + price_text(current, prefix, suffix), bold=True),
+            rich("\n" + line, color=color),
         ]
         api_request(f"{API}/blocks/{targets[label]}", "PATCH", {
             "callout": {"rich_text": rich_text}
