@@ -9,10 +9,10 @@
   "theme_color": "#101511",
   "icons": [
     {
-      "src": "./assets/icon.svg",
+      "src": "./assets/j-lab-icon.svg?v=2",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
