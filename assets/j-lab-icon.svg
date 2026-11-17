@@ -1,25 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
 <defs>
- <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f2c96b"/><stop offset=".48" stop-color="#b68a3d"/><stop offset=".72" stop-color="#397f83"/><stop offset="1" stop-color="#07516b"/></linearGradient>
- <linearGradient id="gold" x1="0" y1="0" x2=".9" y2="1"><stop stop-color="#fff4a7"/><stop offset=".3" stop-color="#ffd64e"/><stop offset=".68" stop-color="#d58b13"/><stop offset="1" stop-color="#8c4c08"/></linearGradient>
- <linearGradient id="bill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e8f5cf"/><stop offset="1" stop-color="#6eaa7b"/></linearGradient>
- <linearGradient id="arrow" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".55" stop-color="#dff5fa"/><stop offset="1" stop-color="#78b8ce"/></linearGradient>
- <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feGaussianBlur in="SourceAlpha" stdDeviation="9"/><feOffset dy="9"/><feComponentTransfer><feFuncA type="linear" slope=".35"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <linearGradient id="bg" x1="0" y1="0" x2=".15" y2="1"><stop stop-color="#ffe36a"/><stop offset=".38" stop-color="#f7c84d"/><stop offset=".66" stop-color="#68b9b4"/><stop offset="1" stop-color="#08718b"/></linearGradient>
+ <linearGradient id="gold" x1=".12" y1="0" x2=".8" y2="1"><stop stop-color="#fffbd0"/><stop offset=".22" stop-color="#ffe65b"/><stop offset=".53" stop-color="#ffb900"/><stop offset=".8" stop-color="#e58a00"/><stop offset="1" stop-color="#995000"/></linearGradient>
+ <linearGradient id="bill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f4ffe1"/><stop offset=".55" stop-color="#b9dca9"/><stop offset="1" stop-color="#6ca77b"/></linearGradient>
+ <linearGradient id="arrow" x1=".1" y1="0" x2=".8" y2="1"><stop stop-color="#fff"/><stop offset=".45" stop-color="#f5fdff"/><stop offset="1" stop-color="#8bd4e9"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feGaussianBlur in="SourceAlpha" stdDeviation="18"/><feOffset dy="22"/><feComponentTransfer><feFuncA type="linear" slope=".38"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <filter id="soft"><feGaussianBlur stdDeviation="18"/></filter>
+ <filter id="shine"><feGaussianBlur stdDeviation="5"/></filter>
 </defs>
-<rect x="16" y="16" width="480" height="480" rx="106" fill="url(#bg)" stroke="#fff1bd" stroke-opacity=".42" stroke-width="5"/>
-<path d="M276 111 321 65 444 183 402 226Z" fill="#d7e8c8" stroke="#526b43" stroke-width="9" stroke-linejoin="round"/>
-<path d="M248 139 293 91 426 218 380 258Z" fill="#c3ddb2" stroke="#526b43" stroke-width="9" stroke-linejoin="round"/>
-<g transform="rotate(-24 347 224)"><rect x="260" y="153" width="173" height="130" rx="13" fill="url(#bill)" stroke="#456e4c" stroke-width="10"/><rect x="274" y="167" width="145" height="102" rx="8" fill="none" stroke="#789c68" stroke-width="5"/><text x="344" y="222" font-family="Arial,sans-serif" font-size="39" font-weight="bold" fill="#315c42" text-anchor="middle">USD</text><text x="401" y="190" font-family="Arial,sans-serif" font-size="24" font-weight="bold" fill="#315c42">$</text></g>
+<rect width="1024" height="1024" fill="#000"/>
+<rect x="38" y="28" width="948" height="968" rx="176" fill="url(#bg)" stroke="#fff4c8" stroke-width="10"/>
+<path d="M42 540 Q500 610 982 490 V850 Q970 986 830 988 H190 Q42 978 38 830Z" fill="#087b9a" opacity=".16"/>
+<path d="M80 70 Q480 10 900 90" fill="none" stroke="#fff8d8" stroke-width="9" opacity=".55"/>
+<!-- layered dollar notes -->
 <g filter="url(#shadow)">
- <path d="M95 327 126 142 Q130 119 153 119 H225 Q247 119 253 142 L286 328 Q290 351 266 359 H112 Q88 351 95 327Z" fill="url(#gold)" stroke="#80500d" stroke-width="10"/>
- <path d="M117 312 146 153 Q149 141 162 141 H218 Q230 141 234 154 L262 315Z" fill="none" stroke="#fff2a0" stroke-width="7" opacity=".8"/>
- <text x="190" y="226" font-family="Arial,sans-serif" font-size="58" font-weight="bold" fill="#98600c" text-anchor="middle">Au</text>
- <text x="190" y="277" font-family="Arial,sans-serif" font-size="29" font-weight="bold" fill="#92550b" text-anchor="middle">999.9</text>
+ <path d="M520 178 638 88 Q652 78 669 90 L902 274 780 400Z" fill="#e8f4d5" stroke="#3e6444" stroke-width="13" stroke-linejoin="round"/>
+ <path d="M483 220 602 128 Q618 116 635 129 L871 319 744 444Z" fill="#d5e9c4" stroke="#426b48" stroke-width="13" stroke-linejoin="round"/>
+ <path d="M450 263 571 168 Q586 157 603 170 L840 359 706 492Z" fill="#c5dfb4" stroke="#426b48" stroke-width="13" stroke-linejoin="round"/>
+ <g transform="rotate(-23 665 344)">
+  <rect x="498" y="237" width="345" height="236" rx="26" fill="url(#bill)" stroke="#315f43" stroke-width="15"/>
+  <rect x="520" y="258" width="301" height="194" rx="17" fill="none" stroke="#719c69" stroke-width="9"/>
+  <path d="M535 280q25 0 25-18M806 429q-25 0-25 18" fill="none" stroke="#739b68" stroke-width="9"/>
+  <circle cx="670" cy="355" r="73" fill="#82b88a" opacity=".5"/>
+  <text x="670" y="378" text-anchor="middle" font-family="Arial,sans-serif" font-size="76" font-weight="900" fill="#24563b">USD</text>
+  <text x="794" y="305" text-anchor="middle" font-family="Arial,sans-serif" font-size="56" font-weight="900" fill="#2f6846">$</text>
+  <text x="548" y="424" text-anchor="middle" font-family="Arial,sans-serif" font-size="56" font-weight="900" fill="#2f6846">$</text>
+ </g>
 </g>
-<path d="M34 390 159 262 232 334 294 271 425 129" fill="none" stroke="#17495a" stroke-width="39" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M34 377 159 249 232 321 294 258 425 116" fill="none" stroke="url(#arrow)" stroke-width="29" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="m385 119 56-16-7 58" fill="none" stroke="#fff" stroke-width="27" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M385 119 441 103 434 161" fill="none" stroke="url(#arrow)" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M105 132 111 119 117 132 130 138 117 144 111 157 105 144 92 138Z" fill="#fff8c9" opacity=".95"/>
-<circle cx="120" cy="305" r="8" fill="#fff9d0"/>
+<!-- gold bullion -->
+<g filter="url(#shadow)">
+ <path d="M128 610 204 220 Q216 180 260 180 H394 Q438 180 451 224 L531 610 Q542 670 485 686 H174 Q111 670 128 610Z" fill="url(#gold)" stroke="#9a5800" stroke-width="19"/>
+ <path d="M163 596 231 239 Q237 214 264 214 H388 Q414 214 421 241 L493 600Z" fill="none" stroke="#fff6ad" stroke-width="13" opacity=".95"/>
+ <path d="M128 610 163 596 493 600 531 610 485 686 H174Z" fill="#d98500" opacity=".42"/>
+ <path d="M215 248 253 214 H390 Q414 214 421 241 L449 384 190 384Z" fill="#fff8bf" opacity=".15"/>
+ <text x="330" y="414" text-anchor="middle" font-family="Arial,sans-serif" font-size="130" font-weight="900" fill="#8e5100" stroke="#fff0a1" stroke-width="3" paint-order="stroke">Au</text>
+ <text x="330" y="515" text-anchor="middle" font-family="Arial,sans-serif" font-size="73" font-weight="800" fill="#995800" stroke="#ffdf62" stroke-width="2" paint-order="stroke">999.9</text>
+ <path d="M140 500 160 460 180 500 220 520 180 540 160 580 140 540 100 520Z" fill="#fffbd4" opacity=".96"/>
+ <path d="M151 500 160 481 169 500 188 520 169 529 160 548 151 529 132 520Z" fill="#fff"/>
+</g>
+<!-- rising arrow, foreground -->
+<path d="M78 790 382 480 540 645 670 515 900 280" fill="none" stroke="#064b66" stroke-width="100" stroke-linecap="round" stroke-linejoin="round" filter="url(#shadow)"/>
+<path d="M78 770 382 460 540 625 670 495 900 260" fill="none" stroke="url(#arrow)" stroke-width="72" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="m808 278 112-42-20 118" fill="none" stroke="#07516b" stroke-width="96" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="m808 258 112-42-20 118" fill="none" stroke="url(#arrow)" stroke-width="70" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M96 770 382 480 535 640" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity=".48"/>
+<path d="M79 790 Q500 1010 940 780" fill="none" stroke="#d8ffff" stroke-width="8" opacity=".22"/>
 </svg>
