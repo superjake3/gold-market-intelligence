@@ -9,7 +9,7 @@
   "theme_color": "#101511",
   "icons": [
     {
-      "src": "./assets/j-lab-icon.svg?v=3",
+      "src": "./assets/j-lab-icon.svg?v=4",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
