@@ -1,48 +1,44 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
 <defs>
- <linearGradient id="bg" x1="0" y1="0" x2=".15" y2="1"><stop stop-color="#ffe36a"/><stop offset=".38" stop-color="#f7c84d"/><stop offset=".66" stop-color="#68b9b4"/><stop offset="1" stop-color="#08718b"/></linearGradient>
- <linearGradient id="gold" x1=".12" y1="0" x2=".8" y2="1"><stop stop-color="#fffbd0"/><stop offset=".22" stop-color="#ffe65b"/><stop offset=".53" stop-color="#ffb900"/><stop offset=".8" stop-color="#e58a00"/><stop offset="1" stop-color="#995000"/></linearGradient>
- <linearGradient id="bill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f4ffe1"/><stop offset=".55" stop-color="#b9dca9"/><stop offset="1" stop-color="#6ca77b"/></linearGradient>
- <linearGradient id="arrow" x1=".1" y1="0" x2=".8" y2="1"><stop stop-color="#fff"/><stop offset=".45" stop-color="#f5fdff"/><stop offset="1" stop-color="#8bd4e9"/></linearGradient>
- <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feGaussianBlur in="SourceAlpha" stdDeviation="18"/><feOffset dy="22"/><feComponentTransfer><feFuncA type="linear" slope=".38"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
- <filter id="soft"><feGaussianBlur stdDeviation="18"/></filter>
- <filter id="shine"><feGaussianBlur stdDeviation="5"/></filter>
+ <linearGradient id="bg" x1="0" y1="0" x2=".2" y2="1"><stop stop-color="#ffe66a"/><stop offset=".42" stop-color="#eec44d"/><stop offset=".7" stop-color="#2d9a9a"/><stop offset="1" stop-color="#00658a"/></linearGradient>
+ <linearGradient id="gold" x1=".12" y1="0" x2=".8" y2="1"><stop stop-color="#fffbd2"/><stop offset=".22" stop-color="#fff06b"/><stop offset=".52" stop-color="#ffc21b"/><stop offset=".78" stop-color="#e88d00"/><stop offset="1" stop-color="#985000"/></linearGradient>
+ <linearGradient id="bill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5ffe3"/><stop offset=".55" stop-color="#c2e1ae"/><stop offset="1" stop-color="#69a979"/></linearGradient>
+ <linearGradient id="arrow" x1=".12" y1="0" x2=".85" y2="1"><stop stop-color="#fff"/><stop offset=".5" stop-color="#eafaff"/><stop offset="1" stop-color="#70c8ed"/></linearGradient>
+ <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff4bd"/><stop offset=".55" stop-color="#7fe7df"/><stop offset="1" stop-color="#087a9d"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feGaussianBlur in="SourceAlpha" stdDeviation="16"/><feOffset dy="18"/><feComponentTransfer><feFuncA type="linear" slope=".4"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <pattern id="dots" width="15" height="15" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="2.7" fill="#fff3a2" opacity=".48"/></pattern>
 </defs>
-<rect width="1024" height="1024" fill="#000"/>
-<rect x="38" y="28" width="948" height="968" rx="176" fill="url(#bg)" stroke="#fff4c8" stroke-width="10"/>
-<path d="M42 540 Q500 610 982 490 V850 Q970 986 830 988 H190 Q42 978 38 830Z" fill="#087b9a" opacity=".16"/>
-<path d="M80 70 Q480 10 900 90" fill="none" stroke="#fff8d8" stroke-width="9" opacity=".55"/>
-<!-- layered dollar notes -->
+<rect x="22" y="22" width="980" height="980" rx="174" fill="url(#bg)" stroke="url(#edge)" stroke-width="12"/>
+<!-- subtle global market texture -->
+<path d="M65 180 125 130 190 148 248 98 310 119 370 73 435 111 498 82 560 120 626 88 694 130 756 91 826 140 888 111 958 164 958 340 65 340Z" fill="url(#dots)" opacity=".95"/>
+<g opacity=".5" fill="#b6ff7c">
+ <path d="M72 500h17v165H72zM108 455h17v210h-17zM144 400h17v265h-17zM180 450h17v215h-17zM844 500h17v165h-17zM880 420h17v245h-17zM916 330h17v335h-17z"/>
+</g>
 <g filter="url(#shadow)">
- <path d="M520 178 638 88 Q652 78 669 90 L902 274 780 400Z" fill="#e8f4d5" stroke="#3e6444" stroke-width="13" stroke-linejoin="round"/>
- <path d="M483 220 602 128 Q618 116 635 129 L871 319 744 444Z" fill="#d5e9c4" stroke="#426b48" stroke-width="13" stroke-linejoin="round"/>
- <path d="M450 263 571 168 Q586 157 603 170 L840 359 706 492Z" fill="#c5dfb4" stroke="#426b48" stroke-width="13" stroke-linejoin="round"/>
- <g transform="rotate(-23 665 344)">
-  <rect x="498" y="237" width="345" height="236" rx="26" fill="url(#bill)" stroke="#315f43" stroke-width="15"/>
-  <rect x="520" y="258" width="301" height="194" rx="17" fill="none" stroke="#719c69" stroke-width="9"/>
-  <path d="M535 280q25 0 25-18M806 429q-25 0-25 18" fill="none" stroke="#739b68" stroke-width="9"/>
-  <circle cx="670" cy="355" r="73" fill="#82b88a" opacity=".5"/>
-  <text x="670" y="378" text-anchor="middle" font-family="Arial,sans-serif" font-size="76" font-weight="900" fill="#24563b">USD</text>
-  <text x="794" y="305" text-anchor="middle" font-family="Arial,sans-serif" font-size="56" font-weight="900" fill="#2f6846">$</text>
-  <text x="548" y="424" text-anchor="middle" font-family="Arial,sans-serif" font-size="56" font-weight="900" fill="#2f6846">$</text>
+ <!-- bills behind the bullion -->
+ <path d="M470 205 630 91 Q646 80 662 92 L922 293 777 433Z" fill="#e8f2d6" stroke="#426747" stroke-width="13" stroke-linejoin="round"/>
+ <path d="M438 246 592 132 Q608 120 625 133 L886 335 738 475Z" fill="#d5e8c3" stroke="#416b48" stroke-width="13" stroke-linejoin="round"/>
+ <path d="M407 285 553 178 Q570 165 587 178 L849 380 697 520Z" fill="#c4dfb5" stroke="#426b48" stroke-width="13" stroke-linejoin="round"/>
+ <g transform="rotate(-22 652 350)">
+  <rect x="475" y="245" width="360" height="230" rx="24" fill="url(#bill)" stroke="#315e43" stroke-width="15"/>
+  <rect x="496" y="265" width="318" height="190" rx="15" fill="none" stroke="#78a16e" stroke-width="8"/>
+  <circle cx="655" cy="360" r="70" fill="#7db888" opacity=".45"/>
+  <text x="655" y="385" text-anchor="middle" font-family="Arial,sans-serif" font-size="77" font-weight="900" fill="#24583c">USD</text>
+  <text x="790" y="313" text-anchor="middle" font-family="Arial,sans-serif" font-size="55" font-weight="900" fill="#315f43">$</text>
+  <text x="520" y="420" text-anchor="middle" font-family="Arial,sans-serif" font-size="55" font-weight="900" fill="#315f43">$</text>
  </g>
+ <!-- gold bar -->
+ <path d="M128 660 204 292 Q216 250 260 250 H397 Q439 250 451 293 L531 659 Q543 716 485 731 H174 Q111 716 128 660Z" fill="url(#gold)" stroke="#995700" stroke-width="19"/>
+ <path d="M163 645 232 308 Q238 281 265 281 H390 Q415 281 422 309 L493 648Z" fill="none" stroke="#fff7b5" stroke-width="13" opacity=".95"/>
+ <path d="M128 660 163 645 493 648 531 659 485 731 H174Z" fill="#d98400" opacity=".4"/>
+ <text x="330" y="485" text-anchor="middle" font-family="Arial,sans-serif" font-size="132" font-weight="900" fill="#985600" stroke="#fff0a0" stroke-width="3" paint-order="stroke">Au</text>
+ <text x="330" y="586" text-anchor="middle" font-family="Arial,sans-serif" font-size="73" font-weight="800" fill="#965400" stroke="#ffe06a" stroke-width="2" paint-order="stroke">999.9</text>
 </g>
-<!-- gold bullion -->
-<g filter="url(#shadow)">
- <path d="M128 610 204 220 Q216 180 260 180 H394 Q438 180 451 224 L531 610 Q542 670 485 686 H174 Q111 670 128 610Z" fill="url(#gold)" stroke="#9a5800" stroke-width="19"/>
- <path d="M163 596 231 239 Q237 214 264 214 H388 Q414 214 421 241 L493 600Z" fill="none" stroke="#fff6ad" stroke-width="13" opacity=".95"/>
- <path d="M128 610 163 596 493 600 531 610 485 686 H174Z" fill="#d98500" opacity=".42"/>
- <path d="M215 248 253 214 H390 Q414 214 421 241 L449 384 190 384Z" fill="#fff8bf" opacity=".15"/>
- <text x="330" y="414" text-anchor="middle" font-family="Arial,sans-serif" font-size="130" font-weight="900" fill="#8e5100" stroke="#fff0a1" stroke-width="3" paint-order="stroke">Au</text>
- <text x="330" y="515" text-anchor="middle" font-family="Arial,sans-serif" font-size="73" font-weight="800" fill="#995800" stroke="#ffdf62" stroke-width="2" paint-order="stroke">999.9</text>
- <path d="M140 500 160 460 180 500 220 520 180 540 160 580 140 540 100 520Z" fill="#fffbd4" opacity=".96"/>
- <path d="M151 500 160 481 169 500 188 520 169 529 160 548 151 529 132 520Z" fill="#fff"/>
-</g>
-<!-- rising arrow, foreground -->
-<path d="M78 790 382 480 540 645 670 515 900 280" fill="none" stroke="#064b66" stroke-width="100" stroke-linecap="round" stroke-linejoin="round" filter="url(#shadow)"/>
-<path d="M78 770 382 460 540 625 670 495 900 260" fill="none" stroke="url(#arrow)" stroke-width="72" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="m808 278 112-42-20 118" fill="none" stroke="#07516b" stroke-width="96" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="m808 258 112-42-20 118" fill="none" stroke="url(#arrow)" stroke-width="70" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M96 770 382 480 535 640" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity=".48"/>
-<path d="M79 790 Q500 1010 940 780" fill="none" stroke="#d8ffff" stroke-width="8" opacity=".22"/>
+<!-- rising arrow centered in the icon's safe area -->
+<path d="M80 825 382 518 550 682 681 548 913 313" fill="none" stroke="#064b69" stroke-width="100" stroke-linecap="round" stroke-linejoin="round" filter="url(#shadow)"/>
+<path d="M80 800 382 493 550 656 681 522 913 287" fill="none" stroke="url(#arrow)" stroke-width="72" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="m818 300 112-43-20 119" fill="none" stroke="#064b69" stroke-width="95" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="m818 278 112-43-20 119" fill="none" stroke="url(#arrow)" stroke-width="68" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M93 788 382 510 545 668" fill="none" stroke="#fff" stroke-width="9" opacity=".55" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M52 878 Q500 1010 970 850" fill="none" stroke="#d8ffff" stroke-width="9" opacity=".25"/>
 </svg>
