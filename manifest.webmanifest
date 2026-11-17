@@ -1,7 +1,7 @@
 {
-  "name": "GOLD & FX Market Dashboard",
-  "short_name": "GOLD & FX",
-  "description": "국제 금, KRX 금시장 가격, 원화 환율 대시보드",
+  "name": "J LAB — Market Intelligence",
+  "short_name": "J LAB",
+  "description": "Gold, currency and economic indicators. Read the market through numbers.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
