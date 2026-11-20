@@ -1,8 +1,8 @@
 {
   "source": "KRX Open API",
-  "base_date": "20261118",
-  "price_krw_g": 162090.0,
-  "change_krw": "-4770",
-  "change_rate": "-2.86",
-  "fetched_at": "2026-11-20T01:31:33+09:00"
+  "base_date": "20261119",
+  "price_krw_g": 159750.0,
+  "change_krw": "-2340",
+  "change_rate": "-1.44",
+  "fetched_at": "2026-11-21T01:06:05+09:00"
 }
