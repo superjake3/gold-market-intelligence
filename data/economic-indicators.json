@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "fetched_at": "2026-11-22T15:00:26+09:00",
+  "fetched_at": "2026-11-23T15:53:23+09:00",
   "note": "각 지표의 latest.date는 실제 통계 기준일이며 fetched_at은 수집 시각입니다.",
   "indicators": {
     "us_10y_yield": {
