@@ -882,7 +882,28 @@
         "marketStatus": "OPEN",
         "fetchedAt": "2026-11-25T03:21:38+09:00"
       }
+    },
+    {
+      "captured_at": "2026-11-25T11:48:39+09:00",
+      "international_gold": {
+        "closePrice": 3563.2,
+        "localTradedAt": "2026-11-24T20:38:00-06:00",
+        "marketStatus": "OPEN",
+        "fetchedAt": "2026-11-25T11:48:39+09:00"
+      },
+      "domestic_gold": {
+        "closePrice": 154320.0,
+        "localTradedAt": "2026-11-25T11:45:53+09:00",
+        "marketStatus": "OPEN",
+        "fetchedAt": "2026-11-25T11:48:39+09:00"
+      },
+      "usdkrw": {
+        "closePrice": 1342.3,
+        "localTradedAt": "2026-11-25T11:47:13+09:00",
+        "marketStatus": "OPEN",
+        "fetchedAt": "2026-11-25T11:48:39+09:00"
+      }
     }
   ],
-  "updated_at": "2026-11-25T03:21:38+09:00"
+  "updated_at": "2026-11-25T11:48:39+09:00"
 }
